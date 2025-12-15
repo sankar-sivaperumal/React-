@@ -1,24 +1,23 @@
-import { useEffect, useState } from "react";
-import "../App.css"; 
 
+import { useEffect, useState } from "react";
+import "../App.css";
+interface Student {
+  student_id: number;
+  name: string;
+}
 interface Enrollment {
   enrollment_id: number;
-  student_id: number;
-  marks: number;
-  
-
+  marks: string;
+  students: Student | null;  
 }
-
 function Enrollment() {
   const [data, setData] = useState<Enrollment[]>([]);
-
 
   useEffect(() => {
     fetch("http://localhost:5000/enrollments/")
       .then((res) => res.json())
       .then((data) => {
         setData(data);
-        console.log("Enrollment Data:", data);  
       })
       .catch((error) => {
         console.error("Error fetching enrollment data:", error);
@@ -28,11 +27,11 @@ function Enrollment() {
   return (
     <>
       <h2>Enrollments</h2>
-      
       <table border={2}>
         <thead>
           <tr>
             <th>Enrollment ID</th>
+            <th>Student ID</th>
             <th>Student Name</th>
             <th>Marks</th>
           </tr>
@@ -41,8 +40,9 @@ function Enrollment() {
           {data.map((enrollment) => (
             <tr key={enrollment.enrollment_id}>
               <td>{enrollment.enrollment_id}</td>
-              <td>{enrollment.student_id}</td>  
-              <td>{enrollment.marks}</td>
+              <td>{enrollment.students?.student_id }</td> 
+              <td>{enrollment.students?.name}</td>
+              <td>{enrollment.marks}</td> 
             </tr>
           ))}
         </tbody>
@@ -50,5 +50,6 @@ function Enrollment() {
     </>
   );
 }
+export default Enrollment; 
 
-export default Enrollment;
+
