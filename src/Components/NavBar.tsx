@@ -9,6 +9,7 @@ function NavBar() {
           <li><Link className="nav-link" to="/students">Students</Link></li>
           <li><Link className="nav-link" to="/courses">Courses</Link></li>
           <li><Link className="nav-link" to="/enrollments">Enrollments</Link></li>
+          <li><Link className="nav-link" to="/studentDetails">StudentRecords</Link></li>
         </ul>
       </div>
     </nav>
