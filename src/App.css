@@ -1,4 +1,4 @@
-table {
+ table {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
@@ -28,4 +28,153 @@ tbody tr:hover {
 
 tbody tr:nth-child(even) {
     background-color: #f9f9f9;
+} 
+
+
+
+/* Wrapper for filters */
+.filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  justify-content: space-between;
+}
+
+.filters input {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 20%;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.dropdown-button {
+  padding: 8px 16px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  position: relative;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #f44336; 
+  position: absolute;
+  top: 2px;
+  right: 2px;
+}
+
+.clear-button {
+  font-size: 14px;
+  color: white;
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  cursor: pointer;
+}
+
+.clear-button:hover {
+  color: #f44336;
+}
+
+.dropdown-options {
+  position: absolute;
+  right: 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dropdown-options button {
+  padding: 8px 12px;
+  background-color: #f1f1f1;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 4px;
+}
+
+.dropdown-options button:hover {
+  background-color: #ddd;
+}
+
+.highlighted {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.filter-input input {
+  padding: 8px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+
+
+
+/* Clear All Button */
+.clear-all-button {
+  padding: 8px 16px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.clear-all-button:hover {
+  background-color: #d32f2f;
+}
+
+/* Pagination Button Styling */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pagination-button.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+
+.pagination-button:hover {
+  background-color: #45a049;
 }
