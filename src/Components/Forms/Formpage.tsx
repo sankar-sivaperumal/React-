@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useFormData } from "./formcontext";
 import api from "./api";
+import './index.css'
 
 const FormPage: React.FC = () => {
   const { data, updateData, reset } = useFormData();
