@@ -1,5 +1,4 @@
-/* // filter & sort with deselect option version
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../App.css";
 
 interface Student {
@@ -12,290 +11,7 @@ interface Student {
 }
 
 function Student() {
-  const [data, setData] = useState<Student[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [sortField, setSortField] = useState<keyof Student>(); 
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); 
-  const [filters, setFilters] = useState({
-    name: "",
-    age: "",
-    gender: "",
-    city: "",
-  });
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const [showSortOptions, setShowSortOptions] = useState(false);
-  const [showFilterOptions, setShowFilterOptions] = useState(false);
-
-  // Fetch data from the backend
-  useEffect(() => {
-    fetch("http://localhost:5000/students")
-      .then((res) => res.json())
-      .then((data) => {
-        setData(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching student data:", error);
-      });
-  }, []);
-
-  // Sorting logic
-  const sortedData = useMemo(() => {
-    let sorted = [...data];
-    if (sortField && sortOrder) {
-      sorted.sort((a, b) => {
-        if (a[sortField] < b[sortField]) return sortOrder === "asc" ? -1 : 1;
-        if (a[sortField] > b[sortField]) return sortOrder === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-    return sorted;
-  }, [data, sortField, sortOrder]);
-
-  // Filtering logic
-  const filteredData = useMemo(() => {
-    return sortedData.filter((student) => {
-      return (
-        (!filters.name || student.name.toLowerCase().includes(filters.name.toLowerCase())) &&
-        (!filters.age || student.age.toString() === filters.age) &&
-        (!filters.gender || student.gender.toLowerCase() === filters.gender.toLowerCase()) &&
-        (!filters.city || student.city.toLowerCase().includes(filters.city.toLowerCase()))
-      );
-    });
-  }, [sortedData, filters]);
-
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = useMemo(() => {
-    return filteredData.slice(indexOfFirstItem, indexOfLastItem);
-  }, [filteredData, indexOfFirstItem, indexOfLastItem]);
-
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-  const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  // Handle filter changes
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    if (activeFilter) {
-      setFilters({
-        ...filters,
-        [activeFilter]: value,
-      });
-    }
-  };
-
-  // Handle sort button clicks
-  const handleSortClick = (field: keyof Student) => {
-    if (sortField === field) {
-      
-      setSortField(null as any); 
-      setSortOrder("asc"); 
-    } else {
-      setSortField(field);
-      setSortOrder("asc"); 
-    }
-  };
-
-  // Handle filter selection and deselection
-  const handleFilterClick = (field: string) => {
-    if (activeFilter === field) {
-      
-      setActiveFilter(null);
-      setFilters({
-        name: "",
-        age: "",
-        gender: "",
-        city: "",
-      });
-    } else {
-      setActiveFilter(field);
-    }
-  };
-
-  return (
-    <>
-      <h2>Students</h2>
-
-      <div className="action-buttons">
-       {/* sort button *
-        <button
-          onClick={() => setShowSortOptions(!showSortOptions)}
-          className={`dropdown-button ${sortField ? "active" : ""}`}
-        >
-          Sort
-          {sortField && <span className="dot"></span>}
-        </button>
-        {showSortOptions && (
-          <div className="dropdown-options">
-            <button
-              onClick={() => handleSortClick("name")}
-              className={sortField === "name" ? "highlighted" : ""}
-            >
-              Sort by Name
-            </button>
-            <button
-              onClick={() => handleSortClick("age")}
-              className={sortField === "age" ? "highlighted" : ""}
-            >
-              Sort by Age
-            </button>
-            <button
-              onClick={() => handleSortClick("city")}
-              className={sortField === "city" ? "highlighted" : ""}
-            >
-              Sort by City
-            </button>
-            <button
-              onClick={() => handleSortClick("student_id")}
-              className={sortField === "student_id" ? "highlighted" : ""}
-            >
-              Sort by ID
-            </button>
-            <button
-              onClick={() => handleSortClick("gender")}
-              className={sortField === "gender" ? "highlighted" : ""}
-            >
-              Sort by Gender
-            </button>
-            <button
-              onClick={() => handleSortClick("date_of_birth")}
-              className={sortField === "date_of_birth" ? "highlighted" : ""}
-            >
-              Sort by Date of Birth
-            </button>
-          </div>
-        )}
-
-        {/* Filter Button *
-        <button
-          onClick={() => setShowFilterOptions(!showFilterOptions)}
-          className={`dropdown-button ${activeFilter ? "active" : ""}`}
-        >
-          Filter
-          {activeFilter && <span className="dot"></span>}
-        </button>
-        {showFilterOptions && (
-          <div className="dropdown-options">
-            <button
-              onClick={() => handleFilterClick("name")}
-              className={activeFilter === "name" ? "highlighted" : ""}
-            >
-              Filter by Name
-            </button>
-            <button
-              onClick={() => handleFilterClick("age")}
-              className={activeFilter === "age" ? "highlighted" : ""}
-            >
-              Filter by Age
-            </button>
-            <button
-              onClick={() => handleFilterClick("gender")}
-              className={activeFilter === "gender" ? "highlighted" : ""}
-            >
-              Filter by Gender
-            </button>
-            <button
-              onClick={() => handleFilterClick("city")}
-              className={activeFilter === "city" ? "highlighted" : ""}
-            >
-              Filter by City
-            </button>
-
-            {activeFilter && (
-              <div className="filter-input">
-                <input
-                  type={activeFilter === "age" ? "number" : "text"}
-                  value={filters[activeFilter as keyof typeof filters]}
-                  onChange={handleFilterChange}
-                  placeholder={`Enter ${activeFilter}`}
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <table border={2}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Age</th>
-            <th>Gender</th>
-            <th>Date of Birth</th>
-            <th>City</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentItems.map((student) => (
-            <tr key={student.student_id}>
-              <td>{student.student_id}</td>
-              <td>{student.name}</td>
-              <td>{student.age}</td>
-              <td>{student.gender}</td>
-              <td>{student.date_of_birth}</td>
-              <td>{student.city}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Pagination controls *
-      <div className="pagination-controls">
-        <button
-          onClick={prevPage}
-          disabled={currentPage === 1}
-          className={`pagination-button ${currentPage === 1 ? "disabled" : ""}`}
-        >
-          Previous
-        </button>
-        <span className="page-info">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={nextPage}
-          disabled={currentPage === totalPages}
-          className={`pagination-button ${currentPage === totalPages ? "disabled" : ""}`}
-        >
-          Next
-        </button>
-      </div>
-    </>
-  );
-}
-
-export default Student;
-
- */
-
-
-
-import { useEffect, useState } from "react";
-import "../App.css";
-
-interface Student {
-  student_id: number;
-  name: string;
-  age: number;
-  gender: string;
-  date_of_birth: string;
-  city: string;
-}
-
-function Student() {
-  /*STATE */
+  // state variables
   const [data, setData] = useState<Student[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -315,36 +31,67 @@ function Student() {
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [showFilterOptions, setShowFilterOptions] = useState(false);
 
-  /* FETCH PER PAGE  */
-  useEffect(() => {
-    const params = new URLSearchParams();
-    params.append("page", currentPage.toString());
-    params.append("limit", itemsPerPage.toString());
+  const cacheRef = useRef<
+  Record<
+    string,
+    { data: Student[]; total: number }
+  >
+>({});
 
-    // Add sort params
-    if (sortField) {
-      params.append("sortField", sortField);
-      params.append("sortOrder", sortOrder);
-    }
 
-    // Add filters
-    Object.keys(filters).forEach((key) => {
-      const value = (filters as any)[key];
-      if (value) params.append(key, value);
-    });
+  // useeffect to fetch data
+useEffect(() => {
+  const cacheKey = JSON.stringify({
+    page: currentPage,
+    limit: itemsPerPage,
+    sortField,
+    sortOrder,
+    filters,
+  });
 
+// Check cache first
+  if (cacheRef.current[cacheKey]) {
+    const cached = cacheRef.current[cacheKey];
+    setData(cached.data);
+    setTotalItems(cached.total);
+    return;
+  }
+
+  const params = new URLSearchParams();
+  params.append("page", currentPage.toString());
+  params.append("limit", itemsPerPage.toString());
+
+  if (sortField) {
+    params.append("sortField", sortField);
+    params.append("sortOrder", sortOrder);
+  }
+  
+  // Append filters
+  Object.keys(filters).forEach((key) => {
+    const value = (filters as any)[key];
+    if (value) params.append(key, value);
+  });
+
+  // Fetch data from server
     fetch(`http://localhost:5000/students?${params.toString()}`)
-      .then((res) => res.json())
-      .then((res: { data: Student[]; total: number }) => {
-        setData(res.data);
-        setTotalItems(res.total);
-      })
-      .catch((error) => {
-        console.error("Error fetching student data:", error);
-      });
-  }, [currentPage, sortField, sortOrder, filters]);
+    .then((res) => res.json())
+    .then((res: { data: Student[]; total: number }) => {
+      setData(res.data);
+      setTotalItems(res.total);
 
-  /* HANDLERS */
+        // Store in cache
+      cacheRef.current[cacheKey] = {
+        data: res.data,
+        total: res.total,
+      };
+    })
+    .catch((error) => {
+      console.error("Error fetching student data:", error);
+    });
+}, [currentPage, sortField, sortOrder, filters]);
+
+
+//  Handlers
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const nextPage = () => {
@@ -472,18 +219,26 @@ function Student() {
         </tbody>
       </table>
 
-      {/* PAGINATION */}
-      <div className="pagination-controls">
-        <button onClick={prevPage} disabled={currentPage === 1}>
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages || 1}
-        </span>
-        <button onClick={nextPage} disabled={currentPage === totalPages}>
-          Next
-        </button>
-      </div>
+     <div className="pagination-controls">
+  <button
+    onClick={prevPage}
+    disabled={currentPage === 1}
+    className={`pagination-button ${currentPage === 1 ? "disabled" : ""}`}
+  >
+    Previous
+  </button>
+  <span className="page-info">
+    Page {currentPage} of {totalPages || 1}
+  </span>
+  <button
+    onClick={nextPage}
+    disabled={currentPage === totalPages}
+    className={`pagination-button ${currentPage === totalPages ? "disabled" : ""}`}
+  >
+    Next
+  </button>
+</div>
+
     </>
   );
 }
