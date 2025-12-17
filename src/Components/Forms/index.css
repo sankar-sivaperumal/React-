@@ -1,0 +1,118 @@
+/* styles.css */
+
+/* Global Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7fc;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container for both pages */
+.container {
+  width: 80%;
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+/* Form Header */
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Form Elements */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Label and Input */
+label {
+  font-size: 1.1rem;
+  color: #555;
+}
+
+input, select {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Buttons */
+button {
+  padding: 12px;
+  font-size: 1rem;
+  background-color: #5c6bc0;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #3f4db8;
+}
+
+/* Student Details Section */
+h3 {
+  color: #333;
+  margin-top: 20px;
+  font-size: 1.2rem;
+}
+
+/* Preview Page */
+.preview-container {
+  text-align: left;
+}
+
+.preview-container p {
+  font-size: 1rem;
+  margin: 8px 0;
+  color: #555;
+}
+
+/* Go Back Button */
+.go-back-button {
+  padding: 12px;
+  font-size: 1rem;
+  background-color: #ef5350;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.go-back-button:hover {
+  background-color: #d32f2f;
+}
+
+select {
+  width: 100%;
+}
+
+.required {
+  color: red;
+  font-weight: bold;
+}
+
+.error {
+  border: 1px solid red;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
