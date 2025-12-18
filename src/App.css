@@ -1,100 +1,216 @@
- table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    font-family: Arial, sans-serif;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+ /*   GLOBAL STYLES */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
+  margin: 0;
+}
+
+/* HEADINGS */
+h2, h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+/*  FORM CONTAINER */
+.form-container {
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* FORM ELEMENTS*/
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px; 
+  margin-bottom: 12px;
+}
+
+.gender-options {
+  display: flex;
+  gap: 15px; 
+}
+
+.label {
+  margin: 0; 
+}
+.input, select {
+  margin: 0;
+}
+
+.required {
+  color: red;
+  font-weight: bold;
+}
+
+input,
+select {
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  border: 1px solid #d0d7de;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #5c6bc0;
+  box-shadow: 0 0 0 2px rgba(92, 107, 192, 0.15);
+}
+
+input[type="radio"] {
+  margin-right: 6px;
+}
+
+/* ERROR STATES */
+.error {
+  border-color: #e53935;
+}
+
+.error-message {
+  color: #e53935;
+  font-size: 12px;
+}
+
+/*BUTTONS*/
+button {
+  padding: 12px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.25s, transform 0.1s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Button Variants */
+.primary-button {
+  background-color: #5c6bc0;
+  color: #fff;
+}
+
+.primary-button:hover {
+  background-color: #3f4db8;
+}
+
+.back-button {
+  background-color: #ef5350;
+  color: #fff;
+}
+
+.back-button:hover {
+  background-color: #d32f2f;
+}
+
+.confirm-button {
+  background-color: #2e7d32;
+  color: #fff;
+}
+
+.confirm-button:hover {
+  background-color: #1b5e20;
+}
+
+/* PREVIEW SECTION */
+.preview-container {
+  background-color: #f9fafb;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.preview-container p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* TABLE STYLES */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 25px 0;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 thead {
-    background-color: #4CAF50;
-    color: white;
+  background-color: #5c6bc0;
+  color: #ffffff;
 }
 
-th {
-    padding: 12px 15px;
-    text-align: left;
-    font-weight: bold;
-}
-
-td {
-    padding: 10px 15px;
-    border-bottom: 1px solid #ddd;
-}
-
-tbody tr:hover {
-    background-color: #f5f5f5;
+th, td {
+  padding: 12px 15px;
+  text-align: left;
 }
 
 tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-} 
+  background-color: #f6f8fb;
+}
 
+tbody tr:hover {
+  background-color: #eef1f8;
+}
 
-
-/* Wrapper for filters */
+/* FILTERS & ACTIONS */
 .filters {
   display: flex;
   gap: 10px;
   margin-bottom: 15px;
-  justify-content: space-between;
 }
 
 .filters input {
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 20%;
+  flex: 1;
 }
 
 .action-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 15px;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
+/*  DROPDOWN */
 .dropdown-button {
-  padding: 8px 16px;
-  cursor: pointer;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
   position: relative;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #f44336; 
-  position: absolute;
-  top: 2px;
-  right: 2px;
-}
-
-.clear-button {
-  font-size: 14px;
+  background-color: #5c6bc0;
   color: white;
-  position: absolute;
-  top: 4px;
-  right: 5px;
-  cursor: pointer;
-}
-
-.clear-button:hover {
-  color: #f44336;
 }
 
 .dropdown-options {
   position: absolute;
-  right: 20px;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  right: 0;
+  top: 42px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -102,82 +218,38 @@ tbody tr:nth-child(even) {
 }
 
 .dropdown-options button {
-  padding: 8px 12px;
-  background-color: #f1f1f1;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  border-radius: 4px;
+  background: #f1f1f1;
+  color: #333;
 }
 
 .dropdown-options button:hover {
-  background-color: #ddd;
+  background: #e0e0e0;
 }
 
 .highlighted {
-  background-color: #4CAF50;
-  color: white;
+  background-color: #5c6bc0 !important;
+  color: #fff !important;
 }
 
-.filter-input input {
-  padding: 8px;
-  margin-top: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 100%;
-}
-
-
-
-
-/* Clear All Button */
-.clear-all-button {
-  padding: 8px 16px;
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.clear-all-button:hover {
-  background-color: #d32f2f;
-}
-
+/* PAGINATION */
 .pagination-controls {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 15px;
+  align-items: center;
+  gap: 12px;
   margin-top: 20px;
 }
 
 .pagination-button {
-  padding: 8px 16px;
-  background-color: #4CAF50;
+  background-color: #5c6bc0;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.pagination-button.disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.page-info {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.pagination-button:hover {
-  background-color: #45a049;
 }
 
 .pagination-button:disabled {
-  background-color: #e0e0e0;
-  color: #9e9e9e;
+  background-color: #ccc;
+}
+
+.page-info {
+  font-size: 0.95rem;
+  font-weight: 500;
 }
