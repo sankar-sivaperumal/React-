@@ -24,7 +24,7 @@ interface Course {
   enrollments: Enrollment[];
 }
 
-function studentDetails() {
+function StudentDetails() {
   const [data, setData] = useState<Course[]>([]);
 
   useEffect(() => {
@@ -38,17 +38,29 @@ function studentDetails() {
       });
   }, []);
 
+ 
+  const handleEdit = (enrollment: Enrollment) => {
+    console.log("Edit clicked for:", enrollment);
+ 
+  };
+
+  const handleDelete = (enrollmentId: number) => {
+    console.log("Delete clicked for enrollment ID:", enrollmentId);
+ 
+  };
+
   return (
     <>
-      <h2 style={{textAlign:"center"}}>Student Records</h2>
+      <h2 style={{ textAlign: "center" }}>Student Records</h2>
 
       {data.map((course) => (
-        <div key={course.course_id}>
-          <table border={2}>
+        <div key={course.course_id} style={{ marginBottom: "20px" }}>
+          <table border={2} style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
-                <th colSpan={7} style={{ textAlign: "center" }}>
-                  {course.course_name} - <span>{course.teacher_name}</span><br></br>
+                <th colSpan={8} style={{ textAlign: "center" }}>
+                  {course.course_name} - <span>{course.teacher_name}</span>
+                  <br />
                   <span>Course ID: {course.course_id}</span>
                 </th>
               </tr>
@@ -60,6 +72,7 @@ function studentDetails() {
                 <th>Gender</th>
                 <th>City</th>
                 <th>Date of Birth</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -72,6 +85,10 @@ function studentDetails() {
                   <td>{enrollment.students.gender}</td>
                   <td>{enrollment.students.city}</td>
                   <td>{enrollment.students.date_of_birth}</td>
+                  <td>
+                    <button className="btn me-3"style={{ backgroundColor: '#3f4db8', color: 'white', borderColor: '#3f4db8' }} onClick={() => handleEdit(enrollment)}>Edit</button>
+                    <button  className="btn btn-danger"onClick={() => handleDelete(enrollment.enrollment_id)}> Delete</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -82,4 +99,4 @@ function studentDetails() {
   );
 }
 
-export default studentDetails;
+export default StudentDetails;
