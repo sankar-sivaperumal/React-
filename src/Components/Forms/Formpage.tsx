@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { useFormData } from "./formcontext";
 import { useNavigate } from "react-router-dom";
 import api from "./api";
-import '../../App.css'
-
+import "../../App.css";
 
 const FormPage: React.FC = () => {
   const { data, updateData, reset } = useFormData();
@@ -16,39 +15,92 @@ const FormPage: React.FC = () => {
     invalidMarks: "Please enter a valid number for marks.",
   };
 
-  const [errors, setErrors] = useState<Partial<Record<keyof typeof data, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof typeof data, string>>
+  >({});
 
-  // Handle input changes
+  /*  AGE CALCULATION  */
+  const calculateAge = (dob: string) => {
+    if (!dob) return "";
+
+    const birthDate = new Date(dob);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
+  /*  HANDLE CHANGE  */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
-    // Handle numeric and decimal fields
-    if (name === "marks") {
+    // DOB → auto calculate age
+    if (name === "date_of_birth") {
+      const age = calculateAge(value);
+
+      updateData({
+        date_of_birth: value,
+        age: age,
+      });
+    }
+    // Marks (decimal)
+    else if (name === "marks") {
       updateData({ [name]: value as any });
-    } else if (name === "age" || name === "course_id") {
+    }
+    // Numeric fields
+    else if (name === "course_id") {
       updateData({ [name]: value === "" ? "" : Number(value) });
-    } else {
+    }
+    // Other fields
+    else {
       updateData({ [name]: value as any });
     }
 
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // Step validation
+  /*  STEP VALIDATION  */
   const validateStep = () => {
     let currentErrors: Partial<Record<keyof typeof data, string>> = {};
     let isValid = true;
 
     if (step === 1) {
-      if (!data.name) { currentErrors.name = validationMessages.required; isValid = false; }
-      if (!data.age) { currentErrors.age = validationMessages.required; isValid = false; }
-      if (!data.gender) { currentErrors.gender = validationMessages.required; isValid = false; }
-      if (!data.city) { currentErrors.city = validationMessages.required; isValid = false; }
-      if (!data.date_of_birth) { currentErrors.date_of_birth = validationMessages.required; isValid = false; }
+      if (!data.name) {
+        currentErrors.name = validationMessages.required;
+        isValid = false;
+      }
+      if (!data.age) {
+        currentErrors.age = validationMessages.required;
+        isValid = false;
+      }
+      if (!data.gender) {
+        currentErrors.gender = validationMessages.required;
+        isValid = false;
+      }
+      if (!data.city) {
+        currentErrors.city = validationMessages.required;
+        isValid = false;
+      }
+      if (!data.date_of_birth) {
+        currentErrors.date_of_birth = validationMessages.required;
+        isValid = false;
+      }
     } else if (step === 2) {
-      if (!data.course_id) { currentErrors.course_id = validationMessages.selectCourse; isValid = false; }
+      if (!data.course_id) {
+        currentErrors.course_id = validationMessages.selectCourse;
+        isValid = false;
+      }
 
       if (data.marks !== "" && isNaN(Number(data.marks))) {
         currentErrors.marks = validationMessages.invalidMarks;
@@ -60,20 +112,26 @@ const FormPage: React.FC = () => {
     return isValid;
   };
 
-  const handleNext = () => { if (validateStep()) setStep(step + 1); };
+  const handleNext = () => {
+    if (validateStep()) setStep(step + 1);
+  };
+
   const handleBack = () => setStep(step - 1);
 
-  // Final submit & Submit 
+  /* SAVE & SUBMIT */
   const handleSave = async () => {
-    const marksString = data.marks !== "" && data.marks !== undefined && data.marks !== null
-      ? parseFloat(data.marks.toString()).toFixed(2) 
-      : undefined;
+    const calculatedAge = calculateAge(data.date_of_birth);
+
+    const marksString =
+      data.marks !== "" && data.marks !== undefined && data.marks !== null
+        ? parseFloat(data.marks.toString()).toFixed(2)
+        : undefined;
 
     const payload = {
       ...data,
-      age: Number(data.age),
+      age: calculatedAge,
       course_id: data.course_id ? Number(data.course_id) : undefined,
-      marks: marksString, 
+      marks: marksString,
     };
 
     try {
@@ -84,12 +142,16 @@ const FormPage: React.FC = () => {
       navigate("/student");
     } catch (error: any) {
       console.error("Validation Error:", error.response?.data);
-      alert("Failed to save: " + (error.response?.data?.message || "Check your data"));
+      alert(
+        "Failed to save: " +
+          (error.response?.data?.message || "Check your data")
+      );
     }
   };
 
   return (
-    <div >
+    <div>
+   
       {step === 1 && (
         <div className="form-container">
           <h2>Student Details</h2>
@@ -101,10 +163,12 @@ const FormPage: React.FC = () => {
                 Name <span className="required">*</span>
               </label>
               <input name="name" value={data.name} onChange={handleChange} />
-              {errors.name && <div className="error-message">{errors.name}</div>}
+              {errors.name && (
+                <div className="error-message">{errors.name}</div>
+              )}
             </div>
 
-            {/* Age */}
+            {/* Age (AUTO CALCULATED) */}
             <div className="form-group">
               <label>
                 Age <span className="required">*</span>
@@ -113,9 +177,11 @@ const FormPage: React.FC = () => {
                 type="number"
                 name="age"
                 value={data.age}
-                onChange={handleChange}
+                readOnly
               />
-              {errors.age && <div className="error-message">{errors.age}</div>}
+              {errors.age && (
+                <div className="error-message">{errors.age}</div>
+              )}
             </div>
 
             {/* Gender */}
@@ -156,10 +222,12 @@ const FormPage: React.FC = () => {
                 <option value="Madurai">Madurai</option>
                 <option value="Tirchy">Tirchy</option>
               </select>
-              {errors.city && <div className="error-message">{errors.city}</div>}
+              {errors.city && (
+                <div className="error-message">{errors.city}</div>
+              )}
             </div>
 
-            {/* Date of Birth */}
+            {/* DOB */}
             <div className="form-group">
               <label>
                 Date of Birth <span className="required">*</span>
@@ -171,17 +239,14 @@ const FormPage: React.FC = () => {
                 onChange={handleChange}
               />
               {errors.date_of_birth && (
-                <div className="error-message">{errors.date_of_birth}</div>
+                <div className="error-message">
+                  {errors.date_of_birth}
+                </div>
               )}
             </div>
 
-            {/* Action buttons */}
             <div className="action-buttons">
-              <button
-                type="button"
-                className="primary-button"
-                onClick={handleNext}
-              >
+              <button className="primary-button" onClick={handleNext}>
                 Next
               </button>
             </div>
@@ -189,7 +254,7 @@ const FormPage: React.FC = () => {
         </div>
       )}
 
-
+     
       {step === 2 && (
         <div className="form-container">
           <h2>Course Selection</h2>
@@ -224,7 +289,6 @@ const FormPage: React.FC = () => {
                 name="marks"
                 value={data.marks}
                 onChange={handleChange}
-                placeholder="e.g. 85.50"
               />
               {errors.marks && (
                 <div className="error-message">{errors.marks}</div>
@@ -232,20 +296,23 @@ const FormPage: React.FC = () => {
             </div>
 
             <div className="action-buttons">
-              <button className="back-button" onClick={handleBack}>Back</button>
-              <button className="primary-button" onClick={handleNext}>Next</button>
+              <button className="back-button" onClick={handleBack}>
+                Back
+              </button>
+              <button className="primary-button" onClick={handleNext}>
+                Next
+              </button>
             </div>
           </div>
         </div>
       )}
 
-
+     
       {step === 3 && (
-      <div className="form-container">
-        <h2>Preview & Confirm</h2>
+        <div className="form-container">
+          <h2>Preview & Confirm</h2>
 
-        <div className="form">
-          <div className="preview-container">
+          <div className="form">
             <p><strong>Name:</strong> {data.name}</p>
             <p><strong>Age:</strong> {data.age}</p>
             <p><strong>Gender:</strong> {data.gender}</p>
@@ -253,19 +320,18 @@ const FormPage: React.FC = () => {
             <p><strong>DOB:</strong> {data.date_of_birth}</p>
             <p><strong>Course ID:</strong> {data.course_id}</p>
             <p><strong>Marks:</strong> {data.marks || "N/A"}</p>
-          </div>
 
-          <div className="action-buttons">
-            <button className="back-button" onClick={handleBack}>
-              Back
-            </button>
-            <button className="confirm-button" onClick={handleSave}>
-              Confirm & Submit
-            </button>
+            <div className="action-buttons">
+              <button className="back-button" onClick={handleBack}>
+                Back
+              </button>
+              <button className="confirm-button" onClick={handleSave}>
+                Confirm & Submit
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </div>
   );
 };
