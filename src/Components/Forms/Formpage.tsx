@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useFormData } from "./formcontext";
 import { useNavigate } from "react-router-dom";
 import api from "./api";
-import './index.css';
+import '../../App.css'
 
 
 const FormPage: React.FC = () => {
@@ -89,111 +89,162 @@ const FormPage: React.FC = () => {
   };
 
   return (
-    <div className="form-container">
+    <div >
       {step === 1 && (
-  <div className="form-container">
-    <h2>Student Details</h2>
+        <div className="form-container">
+          <h2>Student Details</h2>
 
-    {/* Name */}
-    <div className="form-group">
-      <label>Name <span className="required">*</span></label>
-      <input name="name" value={data.name} onChange={handleChange} />
-      {errors.name && <div className="error-message">{errors.name}</div>}
-    </div>
+          <div className="form">
+            {/* Name */}
+            <div className="form-group">
+              <label>
+                Name <span className="required">*</span>
+              </label>
+              <input name="name" value={data.name} onChange={handleChange} />
+              {errors.name && <div className="error-message">{errors.name}</div>}
+            </div>
 
-    {/* Age */}
-    <div className="form-group">
-      <label>Age <span className="required">*</span></label>
-      <input type="number" name="age" value={data.age} onChange={handleChange} />
-      {errors.age && <div className="error-message">{errors.age}</div>}
-    </div>
+            {/* Age */}
+            <div className="form-group">
+              <label>
+                Age <span className="required">*</span>
+              </label>
+              <input
+                type="number"
+                name="age"
+                value={data.age}
+                onChange={handleChange}
+              />
+              {errors.age && <div className="error-message">{errors.age}</div>}
+            </div>
 
-    {/* Gender */}
-    <div className="form-group">
-      <label>Gender <span className="required">*</span></label>
-      <div className="gender-options">
-        {["M", "F", "Other"].map((g) => (
-          <label key={g}>
-            <input
-              type="radio"
-              name="gender"
-              value={g}
-              checked={data.gender === g}
-              onChange={handleChange}
-            />
-            {g === "M" ? "Male" : g === "F" ? "Female" : "Other"}
-          </label>
-        ))}
-      </div>
-      {errors.gender && <div className="error-message">{errors.gender}</div>}
-    </div>
+            {/* Gender */}
+            <div className="form-group">
+              <label>
+                Gender <span className="required">*</span>
+              </label>
+              <div className="gender-options">
+                {["M", "F", "Other"].map((g) => (
+                  <label key={g}>
+                    <input
+                      type="radio"
+                      name="gender"
+                      value={g}
+                      checked={data.gender === g}
+                      onChange={handleChange}
+                    />
+                    {g === "M" ? "Male" : g === "F" ? "Female" : "Other"}
+                  </label>
+                ))}
+              </div>
+              {errors.gender && (
+                <div className="error-message">{errors.gender}</div>
+              )}
+            </div>
 
-    {/* City */}
-    <div className="form-group">
-      <label>City <span className="required">*</span></label>
-      <select name="city" value={data.city} onChange={handleChange}>
-        <option value="">Select City</option>
-        <option value="Tirunelveli">Tirunelveli</option>
-        <option value="Chennai">Chennai</option>
-        <option value="Bangalore">Bangalore</option>
-        <option value="Coimbatore">Coimbatore</option>
-        <option value="Madurai">Madurai</option>
-        <option value="Tirchy">Tirchy</option>
-      </select>
-      {errors.city && <div className="error-message">{errors.city}</div>}
-    </div>
+            {/* City */}
+            <div className="form-group">
+              <label>
+                City <span className="required">*</span>
+              </label>
+              <select name="city" value={data.city} onChange={handleChange}>
+                <option value="">Select City</option>
+                <option value="Tirunelveli">Tirunelveli</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="Coimbatore">Coimbatore</option>
+                <option value="Madurai">Madurai</option>
+                <option value="Tirchy">Tirchy</option>
+              </select>
+              {errors.city && <div className="error-message">{errors.city}</div>}
+            </div>
 
-    {/* Date of Birth */}
-    <div className="form-group">
-      <label>Date of Birth <span className="required">*</span></label>
-      <input type="date" name="date_of_birth" value={data.date_of_birth} onChange={handleChange} />
-      {errors.date_of_birth && <div className="error-message">{errors.date_of_birth}</div>}
-    </div>
+            {/* Date of Birth */}
+            <div className="form-group">
+              <label>
+                Date of Birth <span className="required">*</span>
+              </label>
+              <input
+                type="date"
+                name="date_of_birth"
+                value={data.date_of_birth}
+                onChange={handleChange}
+              />
+              {errors.date_of_birth && (
+                <div className="error-message">{errors.date_of_birth}</div>
+              )}
+            </div>
 
-    {/* Next Button */}
-    <button type="button" className="next-button" onClick={handleNext}>
-      Next
-    </button>
-  </div>
-)}
-
-
-      {step === 2 && (
-        <div>
-          <h2>Course Selection</h2>
-          <div className="form-group">
-            <label>Course *</label><br/>
-            <select name="course_id" value={data.course_id} onChange={handleChange}>
-              <option value="">Select Course</option>
-              <option value={101}>Maths</option>
-              <option value={102}>Physics</option>
-              <option value={103}>Chemistry</option>
-              <option value={104}>Computer Science</option>
-              <option value={105}>English</option>
-            </select>
-            {errors.course_id && <div className="error-message">{errors.course_id}</div>}
+            {/* Action buttons */}
+            <div className="action-buttons">
+              <button
+                type="button"
+                className="primary-button"
+                onClick={handleNext}
+              >
+                Next
+              </button>
+            </div>
           </div>
-          <div className="form-group">
-            <label>Marks (Decimal allowed)</label><br/>
-            <input 
-              type="number" 
-              step="0.01" 
-              name="marks" 
-              value={data.marks} 
-              onChange={handleChange}
-              placeholder="e.g. 85.50"
-            />
-            {errors.marks && <div className="error-message">{errors.marks}</div>}
-          </div >
-
-          <button className="back-button gap:" onClick={handleBack} >Back</button>
-          <button className="next-button" onClick={handleNext}>Next</button>
         </div>
       )}
 
+
+      {step === 2 && (
+        <div className="form-container">
+          <h2>Course Selection</h2>
+
+          <div className="form">
+            <div className="form-group">
+              <label>
+                Course <span className="required">*</span>
+              </label>
+              <select
+                name="course_id"
+                value={data.course_id}
+                onChange={handleChange}
+              >
+                <option value="">Select Course</option>
+                <option value={101}>Maths</option>
+                <option value={102}>Physics</option>
+                <option value={103}>Chemistry</option>
+                <option value={104}>Computer Science</option>
+                <option value={105}>English</option>
+              </select>
+              {errors.course_id && (
+                <div className="error-message">{errors.course_id}</div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>Marks (Decimal allowed)</label>
+              <input
+                type="number"
+                step="0.01"
+                name="marks"
+                value={data.marks}
+                onChange={handleChange}
+                placeholder="e.g. 85.50"
+              />
+              {errors.marks && (
+                <div className="error-message">{errors.marks}</div>
+              )}
+            </div>
+
+            <div className="action-buttons">
+              <button className="back-button" onClick={handleBack}>Back</button>
+              <button className="primary-button" onClick={handleNext}>Next</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       {step === 3 && (
-        <div>
-          <h2>Preview & Confirm</h2>
+      <div className="form-container">
+        <h2>Preview & Confirm</h2>
+
+        <div className="form">
           <div className="preview-container">
             <p><strong>Name:</strong> {data.name}</p>
             <p><strong>Age:</strong> {data.age}</p>
@@ -203,10 +254,18 @@ const FormPage: React.FC = () => {
             <p><strong>Course ID:</strong> {data.course_id}</p>
             <p><strong>Marks:</strong> {data.marks || "N/A"}</p>
           </div>
-          <button className="back-button " onClick={handleBack}>Back</button>
-          <button className="confirm-button" onClick={handleSave}>Confirm & Submit</button>
+
+          <div className="action-buttons">
+            <button className="back-button" onClick={handleBack}>
+              Back
+            </button>
+            <button className="confirm-button" onClick={handleSave}>
+              Confirm & Submit
+            </button>
+          </div>
         </div>
-      )}
+      </div>
+    )}
     </div>
   );
 };
