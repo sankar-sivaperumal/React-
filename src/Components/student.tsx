@@ -1,4 +1,4 @@
- import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../App.css";
 
 interface Student {
@@ -10,8 +10,23 @@ interface Student {
   city: string;
 }
 
+const SORT_FIELDS: (keyof Student)[] = [
+  "student_id",
+  "name",
+  "age",
+  "gender",
+  "date_of_birth",
+  "city",
+];
+
+const FILTER_FIELDS: (keyof Pick<Student, "name" | "age" | "gender" | "city">)[] = [
+  "name",
+  "age",
+  "gender",
+  "city",
+];
+
 function Student() {
-  // state variables
   const [data, setData] = useState<Student[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -20,7 +35,7 @@ function Student() {
   const [sortField, setSortField] = useState<keyof Student | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Record<string, string>>({
     name: "",
     age: "",
     gender: "",
@@ -31,81 +46,71 @@ function Student() {
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [showFilterOptions, setShowFilterOptions] = useState(false);
 
-  const cacheRef = useRef<
-  Record<
-    string,
-    { data: Student[]; total: number }
-  >
->({});
+  const cacheRef = useRef<Record<string, { data: Student[]; total: number }>>({});
 
+  // Debounce helper
+  const debounce = (fn: Function, delay = 500) => {
+    let timer: any;
+    return (...args: any) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  };
 
-  // useeffect to fetch data
-useEffect(() => {
-  const cacheKey = JSON.stringify({
-    page: currentPage,
-    limit: itemsPerPage,
-    sortField,
-    sortOrder,
-    filters,
-  });
+  // Build cache key
+  const buildCacheKey = (page = currentPage) =>
+    JSON.stringify({ page, limit: itemsPerPage, sortField, sortOrder, filters });
 
-// Check cache first
-  if (cacheRef.current[cacheKey]) {
-    const cached = cacheRef.current[cacheKey];
-    setData(cached.data);
-    setTotalItems(cached.total);
-    return;
-  }
+  // Fetch students
+  const fetchStudents = async (page = currentPage) => {
+    const cacheKey = buildCacheKey(page);
 
-  const params = new URLSearchParams();
-  params.append("page", currentPage.toString());
-  params.append("limit", itemsPerPage.toString());
+    if (cacheRef.current[cacheKey]) {
+      const cached = cacheRef.current[cacheKey];
+      if (page === currentPage) setData(cached.data);
+      setTotalItems(cached.total);
+      return;
+    }
 
-  if (sortField) {
-    params.append("sortField", sortField);
-    params.append("sortOrder", sortOrder);
-  }
-  
-  // Append filters
-  Object.keys(filters).forEach((key) => {
-    const value = (filters as any)[key];
-    if (value) params.append(key, value);
-  });
-
-  // Fetch data from server
-    fetch(`http://localhost:5000/students?${params.toString()}`)
-    .then((res) => res.json())
-    .then((res: { data: Student[]; total: number }) => {
-      setData(res.data);
-      setTotalItems(res.total);
-
-        // Store in cache
-      cacheRef.current[cacheKey] = {
-        data: res.data,
-        total: res.total,
-      };
-    })
-    .catch((error) => {
-      console.error("Error fetching student data:", error);
+    const params = new URLSearchParams();
+    params.append("page", page.toString());
+    params.append("limit", itemsPerPage.toString());
+    if (sortField) {
+      params.append("sortField", sortField);
+      params.append("sortOrder", sortOrder);
+    }
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.append(key, value);
     });
-}, [currentPage, sortField, sortOrder, filters]);
 
+    try {
+      const res = await fetch(`http://localhost:5000/students?${params.toString()}`);
+      const json: { data: Student[]; total: number } = await res.json();
+      cacheRef.current[cacheKey] = { data: json.data, total: json.total };
+      if (page === currentPage) setData(json.data);
+      setTotalItems(json.total);
+    } catch (err) {
+      console.error("Error fetching students:", err);
+    }
+  };
 
-//  Handlers
+  // Fetch current and next page (pre-fetch)
+  useEffect(() => {
+    fetchStudents(currentPage);
+    const nextPage = currentPage + 1;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (nextPage <= totalPages) fetchStudents(nextPage);
+  }, [currentPage, sortField, sortOrder, filters]);
+
+  // Pagination
   const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const nextPage = () => currentPage < totalPages && setCurrentPage((p) => p + 1);
+  const prevPage = () => currentPage > 1 && setCurrentPage((p) => p - 1);
 
-  const nextPage = () => {
-    if (currentPage < totalPages) setCurrentPage((p) => p + 1);
-  };
-
-  const prevPage = () => {
-    if (currentPage > 1) setCurrentPage((p) => p - 1);
-  };
-
+  // Sort handler
   const handleSortClick = (field: keyof Student) => {
     if (sortField === field) {
-      setSortField(null);
-      setSortOrder("asc");
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
       setSortOrder("asc");
@@ -113,6 +118,7 @@ useEffect(() => {
     setCurrentPage(1);
   };
 
+  // Filter toggle handler
   const handleFilterClick = (field: string) => {
     if (activeFilter === field) {
       setActiveFilter(null);
@@ -123,12 +129,11 @@ useEffect(() => {
     setCurrentPage(1);
   };
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!activeFilter) return;
-    setFilters({ ...filters, [activeFilter]: e.target.value });
+  // Filter input change (debounced)
+  const handleFilterChange = debounce((field: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
     setCurrentPage(1);
-  };
-
+  }, 500);
 
   return (
     <>
@@ -136,7 +141,7 @@ useEffect(() => {
 
       {/* ACTION BUTTONS */}
       <div className="action-buttons">
-        {/* SORT */}
+        {/* SORT DROPDOWN */}
         <button
           onClick={() => setShowSortOptions((v) => !v)}
           className={`dropdown-button ${sortField ? "active" : ""}`}
@@ -145,31 +150,28 @@ useEffect(() => {
         </button>
         {showSortOptions && (
           <div className="dropdown-options">
-            {(
-              ["name", "age", "city", "student_id", "gender", "date_of_birth"] as (keyof Student)[]
-            ).map((field) => (
+            {SORT_FIELDS.map((field) => (
               <button
                 key={field}
                 onClick={() => handleSortClick(field)}
                 className={sortField === field ? "highlighted" : ""}
               >
-                Sort by {field.replace("_", " ")}
+                {sortField === field ? `Sort by ${field} (${sortOrder})` : `Sort by ${field}`}
               </button>
             ))}
           </div>
         )}
 
-        {/* FILTER */}
+        {/* FILTER DROPDOWN */}
         <button
           onClick={() => setShowFilterOptions((v) => !v)}
           className={`dropdown-button ${activeFilter ? "active" : ""}`}
         >
           Filter {activeFilter && <span className="dot"></span>}
         </button>
-
         {showFilterOptions && (
           <div className="dropdown-options">
-            {["name", "age", "gender", "city"].map((field) => (
+            {FILTER_FIELDS.map((field) => (
               <button
                 key={field}
                 onClick={() => handleFilterClick(field)}
@@ -183,8 +185,8 @@ useEffect(() => {
               <div className="filter-input">
                 <input
                   type={activeFilter === "age" ? "number" : "text"}
-                  value={filters[activeFilter as keyof typeof filters]}
-                  onChange={handleFilterChange}
+                  defaultValue={filters[activeFilter]}
+                  onChange={(e) => handleFilterChange(activeFilter, e.target.value)}
                   placeholder={`Enter ${activeFilter}`}
                 />
               </div>
@@ -219,29 +221,28 @@ useEffect(() => {
         </tbody>
       </table>
 
-     <div className="pagination-controls">
-  <button
-    onClick={prevPage}
-    disabled={currentPage === 1}
-    className={`pagination-button ${currentPage === 1 ? "disabled" : ""}`}
-  >
-    Previous
-  </button>
-  <span className="page-info">
-    Page {currentPage} of {totalPages || 1}
-  </span>
-  <button
-    onClick={nextPage}
-    disabled={currentPage === totalPages}
-    className={`pagination-button ${currentPage === totalPages ? "disabled" : ""}`}
-  >
-    Next
-  </button>
-</div>
-
+      {/* PAGINATION */}
+      <div className="pagination-controls">
+        <button
+          onClick={prevPage}
+          disabled={currentPage === 1}
+          className={`pagination-button ${currentPage === 1 ? "disabled" : ""}`}
+        >
+          Previous
+        </button>
+        <span className="page-info">
+          Page {currentPage} of {totalPages || 1}
+        </span>
+        <button
+          onClick={nextPage}
+          disabled={currentPage === totalPages}
+          className={`pagination-button ${currentPage === totalPages ? "disabled" : ""}`}
+        >
+          Next
+        </button>
+      </div>
     </>
   );
 }
 
-export default Student; 
-
+export default Student;
