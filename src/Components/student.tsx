@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+ import { useEffect, useRef, useState } from "react";
 import "../App.css";
 
 interface Student {
@@ -243,4 +243,5 @@ useEffect(() => {
   );
 }
 
-export default Student;
+export default Student; 
+
