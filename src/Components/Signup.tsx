@@ -1,85 +1,98 @@
-import React, { useState } from 'react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./Access/AuthContext"; 
 
-export const Signup: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+function Signup() {
+  const navigate = useNavigate();
+  const { completeSignup } = useAuth(); 
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
+  const [pwd1, setPwd1] = useState("");
+  const [pwd2, setPwd2] = useState("");
+  const [match, setMatch] = useState(true);
 
-        if (!email || !password || !confirmPassword) {
-            setError('All fields are required');
-            return;
-        }
+  function handlePwd1Change(event: React.ChangeEvent<HTMLInputElement>) {
+    setPwd1(event.target.value);
+  }
 
-        if (password !== confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
+  function handlePwd2Change(event: React.ChangeEvent<HTMLInputElement>) {
+    const value = event.target.value;
+    setPwd2(value);
+    setMatch(pwd1 === value);
+  }
 
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters');
-            return;
-        }
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!match) return;
 
-        setLoading(true);
-        try {
-            // Add your signup API call here
-            console.log('Signing up with:', { email, password });
-            // const response = await fetch('/api/signup', { ... });
-        } catch (err) {
-            setError('Signup failed. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    completeSignup();        
+    navigate("/login");        
+  }
 
-    return (
-        <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-            <h2>Sign Up</h2>
-            <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '15px' }}>
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                    />
-                </div>
-                <div style={{ marginBottom: '15px' }}>
-                    <label>Password:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                    />
-                </div>
-                <div style={{ marginBottom: '15px' }}>
-                    <label>Confirm Password:</label>
-                    <input
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                    />
-                </div>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                <button
-                    type="submit"
-                    disabled={loading}
-                    style={{ width: '100%', padding: '10px', cursor: 'pointer' }}
-                >
-                    {loading ? 'Signing up...' : 'Sign Up'}
-                </button>
-            </form>
-        </div>
-    );
-};
+  return (
+    <form
+      className="my-5"
+      style={{ width: "25%", margin: "auto" }}
+      onSubmit={handleSubmit}
+    >
+      <h1 style={{ textAlign: "center" }}>Signup</h1>
+
+      <div className="mb-3">
+        <label className="form-label">Email address</label>
+        <input type="email" className="form-control" required />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Password</label>
+        <input
+          value={pwd1}
+          onChange={handlePwd1Change}
+          type="password"
+          className="form-control"
+          required
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Confirm Password</label>
+        <input
+          value={pwd2}
+          onChange={handlePwd2Change}
+          type="password"
+          className="form-control"
+          required
+        />
+      </div>
+
+      {!match && (
+        <p style={{ color: "red", fontSize: "14px" }}>
+          Passwords do not match
+        </p>
+      )}
+
+      <div className="mb-3 form-check">
+        <input type="checkbox" className="form-check-input" required />
+        <label className="form-check-label">I Agree</label>
+      </div>
+
+      <button
+        type="submit"
+        className="btn btn-primary w-100"
+        disabled={!match}
+      >
+        Create Account
+      </button>
+
+      <p style={{ textAlign: "center", marginTop: "10px" }}>
+        Already have an account?{" "}
+        <span
+          style={{ color: "blue", cursor: "pointer" }}
+          onClick={() => navigate("/login")}
+        >
+          Login
+        </span>
+      </p>
+    </form>
+  );
+}
 
 export default Signup;
