@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ConfirmDeleteModal from "../Components/Model/ConfirmDeleteModal";
+import EditStudentModal from "../Components/Model/EditModel";
 import "../App.css";
 
 interface Student {
@@ -29,8 +30,15 @@ export default function StudentDetails() {
   const [data, setData] = useState<Course[]>([]);
   const [openCourseId, setOpenCourseId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
+
+  // Delete states
   const [confirmStudentId, setConfirmStudentId] = useState<number | null>(null);
   const [loadingDelete, setLoadingDelete] = useState(false);
+
+  // Edit states
+  const [editingStudentId, setEditingStudentId] = useState<number | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<Student>>({});
+  const [loadingEdit, setLoadingEdit] = useState(false);
 
   // Fetch courses
   useEffect(() => {
@@ -42,63 +50,80 @@ export default function StudentDetails() {
       });
   }, []);
 
-  // Toggle course accordion
-  const toggle = (id: number) => {
-    setOpenCourseId((prev) => (prev === id ? null : id));
-  };
+  const toggle = (id: number) => setOpenCourseId((prev) => (prev === id ? null : id));
 
-  // Filter students
   const filteredEnrollments = (course: Course) =>
-    course.enrollments.filter(
-      (e) =>
-        e.students.name.toLowerCase().includes(search.toLowerCase()) ||
-        e.students.city.toLowerCase().includes(search.toLowerCase())
-    );
+    course.enrollments.filter((e) => {
+      const name = e.students?.name ?? "";
+      const city = e.students?.city ?? "";
+      const searchTerm = search ?? "";
+      return (
+        name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        city.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
 
   // Delete student
-  async function handleDelete(studentId: number) {
+  const handleDelete = async (studentId: number) => {
     try {
       setLoadingDelete(true);
+      const res = await fetch(`http://localhost:5000/students/${studentId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete student");
 
-      const response = await fetch(
-        `http://localhost:5000/students/${studentId}`,
-        { method: "DELETE" }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete student");
-      }
-
-      // Update data
       setData((prev) =>
         prev.map((course) => ({
           ...course,
-          enrollments: course.enrollments.filter(
-            (e) => e.students.student_id !== studentId
-          ),
+          enrollments: course.enrollments.filter((e) => e.students.student_id !== studentId),
         }))
       );
-
-      // Close modal
       setConfirmStudentId(null);
     } catch (err) {
       console.error(err);
     } finally {
-      setLoadingDelete(false); // stop loading in any case
+      setLoadingDelete(false);
     }
-  }
+  };
 
+  // Edit Data
+  const handleEditSubmit = async () => {
+    if (editingStudentId === null) return;
 
-  // Edit 
-  async function handleEdit(studentId: number, updatedData: Student) {
-    await fetch(`http://localhost:5000/students/${studentId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedData),
-    });
-  }
+    const studentId = Number(editingStudentId);
+    if (isNaN(studentId)) return;
 
-  return (
+    try {
+      setLoadingEdit(true);
+
+      //  update table immediately
+      setData((prev) =>
+        prev.map((course) => ({
+          ...course,
+          enrollments: course.enrollments.map((e) =>
+            e.students.student_id === studentId
+              ? { ...e, students: { ...e.students, ...editFormData } }
+              : e
+          ),
+        }))
+      );
+
+      //  Send PUT request
+      const res = await fetch(`http://localhost:5000/students/${studentId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (!res.ok) throw new Error("Failed to update");
+
+      setEditingStudentId(null);
+      setEditFormData({});
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingEdit(false);
+    }
+  };
+return (
     <div className="container">
       <h2 className="title">Student Records</h2>
 
@@ -115,13 +140,8 @@ export default function StudentDetails() {
 
         return (
           <div key={course.course_id} className="course-card">
-            <div
-              className="course-header"
-              onClick={() => toggle(course.course_id)}
-            >
-              <span>
-                {course.course_name} — {course.teacher_name}
-              </span>
+            <div className="course-header" onClick={() => toggle(course.course_id)}>
+              <span>{course.course_name} — {course.teacher_name}</span>
               <span>{rows.length} students {isOpen ? "▲" : "▼"}</span>
             </div>
 
@@ -151,19 +171,22 @@ export default function StudentDetails() {
                       <td>{e.students.date_of_birth}</td>
                       <td>
                         <button
-                          className="btn-edit"
-                          onClick={() =>
-                            handleEdit(e.students.student_id, e.students)
-                          }
-                        >
-                          Edit
-                        </button>
+                            className="btn-edit"
+                            onClick={() => {
+                              if (e.students.student_id != null) {
+                                setEditingStudentId(e.students.student_id);
+                                setEditFormData({ ...e.students });
+                              } else {
+                                console.error("Invalid student_id:", e.students);
+                              }
+                            }}
+                          >
+                            Edit
+                          </button>
 
                         <button
                           className="btn-delete"
-                          onClick={() =>
-                            setConfirmStudentId(e.students.student_id)
-                          }
+                          onClick={() => setConfirmStudentId(e.students.student_id)}
                         >
                           Delete
                         </button>
@@ -178,16 +201,20 @@ export default function StudentDetails() {
       })}
 
       <ConfirmDeleteModal
-  open={confirmStudentId !== null}
-  loading={loadingDelete}
-  onCancel={() => setConfirmStudentId(null)}
-  onConfirm={() => {
-    if (confirmStudentId !== null) {
-      handleDelete(confirmStudentId);
-    }
-  }}
-/>
+        open={confirmStudentId !== null}
+        loading={loadingDelete}
+        onCancel={() => setConfirmStudentId(null)}
+        onConfirm={() => confirmStudentId !== null && handleDelete(confirmStudentId)}
+      />
 
+      <EditStudentModal
+        open={editingStudentId !== null}
+        loading={loadingEdit}
+        studentData={editFormData}
+        onChange={(updated) => setEditFormData(updated)}
+        onCancel={() => setEditingStudentId(null)}
+        onSave={handleEditSubmit}
+      />
     </div>
   );
 }
