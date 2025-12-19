@@ -21,7 +21,6 @@ const Main: React.FC = () => {
           <Routes>
             
             <Route path="/" element={<Navigate to="/signup" />} />
-
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
 
