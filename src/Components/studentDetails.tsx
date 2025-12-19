@@ -24,79 +24,149 @@ interface Course {
   enrollments: Enrollment[];
 }
 
-function StudentDetails() {
+export default function StudentDetails() {
   const [data, setData] = useState<Course[]>([]);
+  const [openCourseId, setOpenCourseId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+
+  // Delete records
+  async function handleDelete(studentId: number) {
+    const response = await fetch(
+      `http://localhost:5000/students/${studentId}`,
+      { method: "DELETE" }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to delete student");
+    }
+
+    // Remove student from UI after delete
+    setData((prev) =>
+      prev.map((course) => ({
+        ...course,
+        enrollments: course.enrollments.filter(
+          (e) => e.students.student_id !== studentId
+        ),
+      }))
+    );
+  }
+
+ //Edit records
+  async function handleEdit(studentId: number, updatedData: Student) {
+    const response = await fetch(
+      `http://localhost:5000/students/${studentId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update student");
+    }
+  }
 
   useEffect(() => {
     fetch("http://localhost:5000/courses/")
       .then((res) => res.json())
-      .then((data) => {
-        setData(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching course data:", error);
+      .then((courses: Course[]) => {
+        setData(courses);
+        if (courses.length) setOpenCourseId(courses[0].course_id);
       });
   }, []);
 
- 
-  const handleEdit = (enrollment: Enrollment) => {
-    console.log("Edit clicked for:", enrollment);
- 
+  const toggle = (id: number) => {
+    setOpenCourseId((prev) => (prev === id ? null : id));
   };
 
-  const handleDelete = (enrollmentId: number) => {
-    console.log("Delete clicked for enrollment ID:", enrollmentId);
- 
-  };
+  const filteredEnrollments = (course: Course) =>
+    course.enrollments.filter(
+      (e) =>
+        e.students.name.toLowerCase().includes(search.toLowerCase()) ||
+        e.students.city.toLowerCase().includes(search.toLowerCase())
+    );
 
   return (
-    <>
-      <h2 style={{ textAlign: "center" }}>Student Records</h2>
+    <div className="container">
+      <h2 className="title">Student Records</h2>
 
-      {data.map((course) => (
-        <div key={course.course_id} style={{ marginBottom: "20px" }}>
-          <table border={2} style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th colSpan={8} style={{ textAlign: "center" }}>
-                  {course.course_name} - <span>{course.teacher_name}</span>
-                  <br />
-                  <span>Course ID: {course.course_id}</span>
-                </th>
-              </tr>
-              <tr>
-                <th>Enrollment ID</th>
-                <th>Student Name</th>
-                <th>Marks</th>
-                <th>Age</th>
-                <th>Gender</th>
-                <th>City</th>
-                <th>Date of Birth</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {course.enrollments.map((enrollment) => (
-                <tr key={enrollment.enrollment_id}>
-                  <td>{enrollment.enrollment_id}</td>
-                  <td>{enrollment.students.name}</td>
-                  <td>{enrollment.marks}</td>
-                  <td>{enrollment.students.age}</td>
-                  <td>{enrollment.students.gender}</td>
-                  <td>{enrollment.students.city}</td>
-                  <td>{enrollment.students.date_of_birth}</td>
-                  <td>
-                    <button className="btn me-3"style={{ backgroundColor: '#3f4db8', color: 'white', borderColor: '#3f4db8' }} onClick={() => handleEdit(enrollment)}>Edit</button>
-                    <button  className="btn btn-danger"onClick={() => handleDelete(enrollment.enrollment_id)}> Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
-    </>
+      <input
+        className="search"
+        placeholder="Search student name or city"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {data.map((course) => {
+        const isOpen = openCourseId === course.course_id;
+        const rows = filteredEnrollments(course);
+
+        return (
+          <div key={course.course_id} className="course-card">
+            <div
+              className="course-header"
+              onClick={() => toggle(course.course_id)}
+            >
+              <span>
+                {course.course_name} — {course.teacher_name}
+              </span>
+              <span>
+                {rows.length} students {isOpen ? "▲" : "▼"}
+              </span>
+            </div>
+
+            {isOpen && (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Enroll ID</th>
+                    <th>Name</th>
+                    <th>Marks</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>City</th>
+                    <th>DOB</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((e) => (
+                    <tr key={e.enrollment_id}>
+                      <td>{e.enrollment_id}</td>
+                      <td>{e.students.name}</td>
+                      <td>{e.marks}</td>
+                      <td>{e.students.age}</td>
+                      <td>{e.students.gender}</td>
+                      <td>{e.students.city}</td>
+                      <td>{e.students.date_of_birth}</td>
+                      <td>
+                        <button
+                          className="btn-edit"
+                          onClick={() =>
+                            handleEdit(e.students.student_id, e.students)
+                          }
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="btn-delete"
+                          onClick={() =>
+                            handleDelete(e.students.student_id)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }
-
-export default StudentDetails;
