@@ -1,5 +1,8 @@
 import { createPortal } from "react-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { FaCalendarAlt } from "react-icons/fa";
 import Student from "../student";
 
 export interface EditStudentModalProps {
@@ -11,6 +14,27 @@ export interface EditStudentModalProps {
   onSave: () => void;
 }
 
+// Custom DatePicker input with calendar icon
+interface DateInputProps {
+  value?: string;
+  onClick?: () => void;
+}
+
+const DateInput = forwardRef<HTMLDivElement, DateInputProps>(
+  ({ value, onClick }, ref) => (
+    <div className="datepicker-input" onClick={onClick} ref={ref}>
+      <input
+        className="input"
+        type="text"
+        value={value}
+        readOnly
+        placeholder="DD-MM-YYYY"
+      />
+      <FaCalendarAlt className="calendar-icon" />
+    </div>
+  )
+);
+
 export default function EditStudentModal({
   open,
   loading,
@@ -19,49 +43,39 @@ export default function EditStudentModal({
   onCancel,
   onSave,
 }: EditStudentModalProps) {
-  const [localData, setLocalData] = useState<Partial<Student>>(studentData);
+  const [localData, setLocalData] = useState<Partial<Student>>({});
 
-    // Sync student data with studentsdetails
+  // Sync only when modal opens
   useEffect(() => {
-    setLocalData(studentData);
-  }, [studentData]);
+    if (open) setLocalData(studentData);
+  }, [open, studentData]);
 
   if (!open) return null;
 
-  // Auto calculate age
-  const calculateAge = (dob?: string) => {
-    if (!dob) return undefined;
-    const birth = new Date(dob);
-    const now = new Date();
-    let age = now.getFullYear() - birth.getFullYear();
-    const m = now.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+  // Calculate age from DOB
+  const calculateAge = (dob: Date) => {
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
     return age;
   };
 
-  const handleChange = (field: keyof Student, value: any) => {
-    let updatedValue = value;
+  const handleDOBChange = (date: Date | null) => {
+    if (!date) return;
 
-    if (field === "age") {
-      // Store age as no or undefined
-      updatedValue = value === "" ? undefined : Number(value);
-      if (isNaN(updatedValue)) updatedValue = undefined;
-    }
+    const age = calculateAge(date);
+    const isoDate = date.toISOString().split("T")[0];
 
-        // update age from dob automatically
-    if (field === "date_of_birth") {
-      const age = calculateAge(value);
-      setLocalData((prev) => {
-        const updated = { ...prev, date_of_birth: value, age };
-        onChange(updated);  // changes from parent to child
-        return updated;
-      });
-      return;
-    }
-
-    const updated = { ...localData, [field]: updatedValue };
+    const updated: Partial<Student> = { ...localData, date_of_birth: isoDate, age };
     setLocalData(updated);
-    onChange(updated); // changes from parent to child
+    onChange(updated);
+  };
+
+  const handleChange = (field: keyof Student, value: any) => {
+    const updated = { ...localData, [field]: value };
+    setLocalData(updated);
+    onChange(updated);
   };
 
   return createPortal(
@@ -71,43 +85,61 @@ export default function EditStudentModal({
 
         <div className="modal-body">
           <input
+            className="input"
             placeholder="Name"
             value={localData.name || ""}
             onChange={(e) => handleChange("name", e.target.value)}
           />
+
           <input
+            className="input"
             placeholder="Age"
             type="number"
-            value={localData.age !== undefined ? localData.age : ""}
-            onChange={(e) => handleChange("age", e.target.value)}
+            value={localData.age ?? ""}
+            readOnly
           />
+
           <input
+            className="input"
             placeholder="Gender"
             value={localData.gender || ""}
             onChange={(e) => handleChange("gender", e.target.value)}
           />
+
           <input
+            className="input"
             placeholder="City"
             value={localData.city || ""}
             onChange={(e) => handleChange("city", e.target.value)}
           />
-          <input
-            placeholder="Date of Birth"
-            type="date"
-            value={localData.date_of_birth || ""}
-            onChange={(e) => handleChange("date_of_birth", e.target.value)}
+
+          <DatePicker
+            selected={
+              localData.date_of_birth ? new Date(localData.date_of_birth) : null
+            }
+            onChange={handleDOBChange}
+            dateFormat="dd-MM-yyyy"
+            maxDate={new Date()}
+            showYearDropdown
+            showMonthDropdown
+            dropdownMode="select"
+            customInput={<DateInput />}
           />
         </div>
 
         <div className="modal-actions">
           <button
-            className="btn-cancel me-3"
+            className="btn-cancel"
             onClick={onCancel}
             disabled={loading}
           >
             Cancel
           </button>
-          <button className="btn-confirm" onClick={onSave} disabled={loading}>
+          <button
+            className="btn-confirm"
+            onClick={onSave}
+            disabled={loading}
+          >
             {loading ? "Saving..." : "Save"}
           </button>
         </div>
