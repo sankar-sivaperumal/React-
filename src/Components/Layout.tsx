@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import NavBar from "./NavBar";
-import Signup from "./Signup";
-import Login from "./login";
+import Signup from "./Login/Signup";
+import Login from "./Login/login";
 import Student from "./student";
 import Courses from "./course";
 import Enrollments from "./enrollment";
