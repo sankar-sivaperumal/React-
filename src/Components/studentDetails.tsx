@@ -69,6 +69,7 @@ export default function StudentDetails() {
         throw new Error("Failed to delete student");
       }
 
+      // Update data
       setData((prev) =>
         prev.map((course) => ({
           ...course,
@@ -77,10 +78,16 @@ export default function StudentDetails() {
           ),
         }))
       );
+
+      // Close modal
+      setConfirmStudentId(null);
     } catch (err) {
       console.error(err);
-    } 
+    } finally {
+      setLoadingDelete(false); // stop loading in any case
+    }
   }
+
 
   // Edit 
   async function handleEdit(studentId: number, updatedData: Student) {
