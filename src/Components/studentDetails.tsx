@@ -146,6 +146,7 @@ return (
             </div>
 
             {isOpen && (
+              <div className="table-wrapper">
               <table className="table">
                 <thead>
                   <tr>
@@ -195,6 +196,7 @@ return (
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
         );
