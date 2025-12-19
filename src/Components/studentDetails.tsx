@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ConfirmDeleteModal from "../Components/Model/ConfirmDeleteModal";
 import EditStudentModal from "../Components/Model/EditModel";
+import { toast } from "react-toastify";
 import "../App.css";
 
 interface Student {
@@ -64,65 +65,83 @@ export default function StudentDetails() {
     });
 
   // Delete student
-  const handleDelete = async (studentId: number) => {
-    try {
-      setLoadingDelete(true);
-      const res = await fetch(`http://localhost:5000/students/${studentId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete student");
+const handleDelete = async (studentId: number) => {
+  try {
+    setLoadingDelete(true);
 
-      setData((prev) =>
-        prev.map((course) => ({
-          ...course,
-          enrollments: course.enrollments.filter((e) => e.students.student_id !== studentId),
-        }))
-      );
-      setConfirmStudentId(null);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingDelete(false);
-    }
-  };
+    const res = await fetch(
+      `http://localhost:5000/students/${studentId}`,
+      { method: "DELETE" }
+    );
+
+    if (!res.ok) throw new Error("Failed to delete student");
+
+    setData((prev) =>
+      prev.map((course) => ({
+        ...course,
+        enrollments: course.enrollments.filter(
+          (e) => e.students.student_id !== studentId
+        ),
+      }))
+    );
+
+    setConfirmStudentId(null);
+
+    toast.success("Student deleted successfully ");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to delete student ");
+  } finally {
+    setLoadingDelete(false);
+  }
+};
+
 
   // Edit Data
-  const handleEditSubmit = async () => {
-    if (editingStudentId === null) return;
+const handleEditSubmit = async () => {
+  if (editingStudentId === null) return;
 
-    const studentId = Number(editingStudentId);
-    if (isNaN(studentId)) return;
+  const studentId = Number(editingStudentId);
+  if (isNaN(studentId)) return;
 
-    try {
-      setLoadingEdit(true);
+  try {
+    setLoadingEdit(true);
 
-      //  update table immediately
-      setData((prev) =>
-        prev.map((course) => ({
-          ...course,
-          enrollments: course.enrollments.map((e) =>
-            e.students.student_id === studentId
-              ? { ...e, students: { ...e.students, ...editFormData } }
-              : e
-          ),
-        }))
-      );
+    // optimistic UI update
+    setData((prev) =>
+      prev.map((course) => ({
+        ...course,
+        enrollments: course.enrollments.map((e) =>
+          e.students.student_id === studentId
+            ? { ...e, students: { ...e.students, ...editFormData } }
+            : e
+        ),
+      }))
+    );
 
-      //  Send PUT request
-      const res = await fetch(`http://localhost:5000/students/${studentId}`, {
+    const res = await fetch(
+      `http://localhost:5000/students/${studentId}`,
+      {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editFormData),
-      });
+      }
+    );
 
-      if (!res.ok) throw new Error("Failed to update");
+    if (!res.ok) throw new Error("Failed to update");
 
-      setEditingStudentId(null);
-      setEditFormData({});
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingEdit(false);
-    }
-  };
+    setEditingStudentId(null);
+    setEditFormData({});
+
+    toast.success("Student updated successfully ✨");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to update student ❌");
+  } finally {
+    setLoadingEdit(false);
+  }
+};
+
 return (
     <div className="container">
       <h2 className="title">Student Records</h2>
