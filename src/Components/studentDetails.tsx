@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import ConfirmDeleteModal from "../Components/Model/ConfirmDeleteModal";
 import "../App.css";
 
 interface Student {
