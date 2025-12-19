@@ -21,14 +21,14 @@ export default function EditStudentModal({
 }: EditStudentModalProps) {
   const [localData, setLocalData] = useState<Partial<Student>>(studentData);
 
-  // Sync with parent whenever studentData changes
+    // Sync student data with studentsdetails
   useEffect(() => {
     setLocalData(studentData);
   }, [studentData]);
 
   if (!open) return null;
 
-  // Calculate age from date_of_birth
+  // Auto calculate age
   const calculateAge = (dob?: string) => {
     if (!dob) return undefined;
     const birth = new Date(dob);
@@ -43,17 +43,17 @@ export default function EditStudentModal({
     let updatedValue = value;
 
     if (field === "age") {
-      // Store age as number or undefined
+      // Store age as no or undefined
       updatedValue = value === "" ? undefined : Number(value);
       if (isNaN(updatedValue)) updatedValue = undefined;
     }
 
+        // update age from dob automatically
     if (field === "date_of_birth") {
-      // Update age automatically when DOB changes
       const age = calculateAge(value);
       setLocalData((prev) => {
         const updated = { ...prev, date_of_birth: value, age };
-        onChange(updated); // propagate to parent
+        onChange(updated);  // changes from parent to child
         return updated;
       });
       return;
@@ -61,7 +61,7 @@ export default function EditStudentModal({
 
     const updated = { ...localData, [field]: updatedValue };
     setLocalData(updated);
-    onChange(updated); // propagate to parent
+    onChange(updated); // changes from parent to child
   };
 
   return createPortal(
