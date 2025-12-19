@@ -160,6 +160,10 @@ table {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+.table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
 thead {
   background-color: #5c6bc0;
   color: #ffffff;
@@ -396,9 +400,7 @@ tbody tr:hover {
 }
 
 
-/* =========================
-   CONFIRM MODAL
-========================= */
+/*CONFIRM MODAL*/
 .confirm-modal {
   background: #ffffff;
   padding: 30px 28px;
@@ -438,7 +440,7 @@ tbody tr:hover {
 .modal-buttons {
   display: flex;
   justify-content: center;
-  gap: 20px; /* space between cancel and confirm buttons */
+  gap: 20px; 
 }
 
 /* Cancel Button */
@@ -498,4 +500,13 @@ tbody tr:hover {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+@media (max-width: 480px) {
+  /* Smaller phones */
+  .form-container {
+    margin: 15px;
+    padding: 15px;
+  }
+
 }
