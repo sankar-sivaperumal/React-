@@ -733,3 +733,22 @@ tbody tr:hover {
 }
 
 
+/* AUTH PAGE LAYOUT */
+
+.auth-wrapper {
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;   
+  padding-bottom: 40px;
+}
+
+
+
+.auth-form {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
