@@ -39,7 +39,7 @@ export default function StudentDetails() {
   const [editFormData, setEditFormData] = useState<Partial<Student>>({});
   const [loadingEdit, setLoadingEdit] = useState(false);
 
-  /* ------------ helpers ------------ */
+  // Helpers 
 
   const sleep = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
@@ -68,7 +68,7 @@ export default function StudentDetails() {
       );
     });
 
-  /* ------------ delete ------------ */
+ //Delete
 
   const handleDelete = async (studentId: number) => {
     try {
@@ -96,8 +96,7 @@ export default function StudentDetails() {
     }
   };
 
-  /* ------------ edit ------------ */
-
+  //Edit
   const handleEditSubmit = async () => {
     if (editingStudentId === null) return;
 
@@ -131,7 +130,7 @@ export default function StudentDetails() {
     }
   };
 
-  /* ------------ UI ------------ */
+   // UI
 
   return (
     <div className="container">
