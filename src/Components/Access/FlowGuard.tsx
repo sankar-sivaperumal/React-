@@ -10,10 +10,11 @@ type Props = {
 const ProtectedRoute: React.FC<Props> = ({ children }) => {
   const { isSignedUp, isLoggedIn } = useAuth();
 
-  
   useEffect(() => {
-    if (!isSignedUp) {
+    const hasShownToast = localStorage.getItem("hasShownToast");
+    if (!hasShownToast && !isSignedUp) {
       toast.error("Please sign up first");
+      localStorage.setItem("hasShownToast", "true");
     }
   }, [isSignedUp]);
 
