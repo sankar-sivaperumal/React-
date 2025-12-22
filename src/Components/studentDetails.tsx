@@ -163,7 +163,7 @@ export default function StudentDetails() {
 
             {isOpen && (
               <div className="table-wrapper">
-                <table className="table">
+                <table >
                   <thead>
                     <tr>
                       <th>Enroll ID</th>

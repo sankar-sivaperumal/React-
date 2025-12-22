@@ -553,3 +553,139 @@ button:disabled {
     padding: 8px 16px;
   }
 }
+
+
+/* =========================
+   EXTRA STYLES MERGED (NO OVERRIDES)
+========================= */
+
+/* PREVIEW SECTION */
+.preview-container {
+  background-color: #f9fafb;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.preview-container p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* FILTERS & ACTIONS */
+.filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.filters input {
+  flex: 1;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* DROPDOWN MENU */
+.dropdown-options {
+  position: absolute;
+  right: 0;
+  top: 42px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.dropdown-options button {
+  background: #f1f1f1;
+  color: #333;
+}
+
+.dropdown-options button:hover {
+  background: #e0e0e0;
+}
+
+.highlighted {
+  background-color: #5c6bc0 !important;
+  color: #fff !important;
+}
+
+/* PAGINATION CONTROLS */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.page-info {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* NAV BRAND */
+.nav-brand {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* SEARCH INPUT SPACING */
+.search {
+  margin-bottom: 16px;
+}
+
+/* TABLE (PLAIN <table> SUPPORT) */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 25px 0;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+thead {
+  background-color: #5c6bc0;
+  color: #ffffff;
+}
+
+th,
+td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f6f8fb;
+}
+
+tbody tr:hover {
+  background-color: #eef1f8;
+}
+
+/* MOBILE NAV FIX */
+@media (max-width: 576px) {
+  .nav-links li {
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .nav-links li a {
+    display: block;
+    width: 100%;
+  }
+}

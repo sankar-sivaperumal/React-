@@ -226,6 +226,7 @@ function Student() {
 
       {/* TABLE */}
         <div className="table-wrapper">
+          
           <table>
             <thead>
               <tr>
