@@ -554,11 +554,6 @@ button:disabled {
   }
 }
 
-
-/* =========================
-   EXTRA STYLES MERGED (NO OVERRIDES)
-========================= */
-
 /* PREVIEW SECTION */
 .preview-container {
   background-color: #f9fafb;
@@ -689,10 +684,7 @@ tbody tr:hover {
     width: 100%;
   }
 }
-/* ==================================================
-   FIX: STYLE RAW INPUTS USED IN FORMPAGE
-================================================== */
-
+/*Form Page*/
 .form-container input,
 .form-container select {
   padding: 10px 12px;
@@ -716,9 +708,7 @@ tbody tr:hover {
 }
 
 
-/* ======================================
-   GENDER RADIO BUTTON – FIX & STYLING
-====================================== */
+/*GENDER RADIO BUTTON */
 
 
 .gender-options {
