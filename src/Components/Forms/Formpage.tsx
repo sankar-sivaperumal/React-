@@ -309,28 +309,31 @@ const FormPage: React.FC = () => {
 
      
       {step === 3 && (
-        <div className="form-container">
-          <h2>Preview & Confirm</h2>
+<div className="form-container">
+  <h2>Preview & Confirm</h2>
 
-          <div className="form">
-            <p><strong>Name:</strong> {data.name}</p>
-            <p><strong>Age:</strong> {data.age}</p>
-            <p><strong>Gender:</strong> {data.gender}</p>
-            <p><strong>City:</strong> {data.city}</p>
-            <p><strong>DOB:</strong> {data.date_of_birth}</p>
-            <p><strong>Course ID:</strong> {data.course_id}</p>
-            <p><strong>Marks:</strong> {data.marks || "N/A"}</p>
+  <div className="form">
+      <div className="preview-container">
+      <p><strong>Name:</strong> {data.name}</p>
+      <p><strong>Age:</strong> {data.age}</p>
+      <p><strong>Gender:</strong> {data.gender}</p>
+      <p><strong>City:</strong> {data.city}</p>
+      <p><strong>DOB:</strong> {data.date_of_birth}</p>
+      <p><strong>Course ID:</strong> {data.course_id}</p>
+      <p><strong>Marks:</strong> {data.marks || "N/A"}</p>
+    </div>
 
-            <div className="action-buttons">
-              <button className="back-button" onClick={handleBack}>
-                Back
-              </button>
-              <button className="confirm-button" onClick={handleSave}>
-                Confirm & Submit
-              </button>
-            </div>
-          </div>
-        </div>
+    <div className="action-buttons">
+      <button className="back-button" onClick={handleBack}>
+        Back
+      </button>
+      <button className="confirm-button" onClick={handleSave}>
+        Confirm & Submit
+      </button>
+    </div>
+  </div>
+</div>
+
       )}
     </div>
   );
