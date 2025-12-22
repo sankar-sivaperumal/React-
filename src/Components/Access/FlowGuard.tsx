@@ -1,4 +1,4 @@
-import React, { type JSX } from "react";
+import React, { useEffect, type JSX } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { toast } from "react-toastify";
@@ -10,8 +10,14 @@ type Props = {
 const ProtectedRoute: React.FC<Props> = ({ children }) => {
   const { isSignedUp, isLoggedIn } = useAuth();
 
+  
+  useEffect(() => {
+    if (!isSignedUp) {
+      toast.error("Please sign up first");
+    }
+  }, [isSignedUp]);
+
   if (!isSignedUp) {
-    toast.error("Please sign up first");
     return <Navigate to="/signup" replace />;
   }
 
