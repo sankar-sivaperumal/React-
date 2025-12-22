@@ -27,7 +27,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const savedUsers = localStorage.getItem("users");
-    if (savedUsers) setUsers(JSON.parse(savedUsers));
+    if (savedUsers) {
+      const parsedUsers = JSON.parse(savedUsers);
+      setUsers(parsedUsers);
+      setIsSignedUp(parsedUsers.length > 0);
+    }
 
     const savedLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     setIsLoggedIn(savedLoggedIn);
@@ -36,11 +40,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (savedEmail && savedUsers) {
       const userList: User[] = JSON.parse(savedUsers);
       const user = userList.find((u) => u.email === savedEmail);
-      if (user) setCurrentUser(user);
+      if (user) {
+        setCurrentUser(user);
+        setIsLoggedIn(true); 
+      }
     }
+  }, []); 
 
-    setIsSignedUp(users.length > 0);
-  }, []);
 
   const completeSignup = (email: string, password: string) => {
     const newUser = { email, password };
@@ -50,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.setItem("users", JSON.stringify(updatedUsers));
   };
 
+  // Login and save
   const completeLogin = (email: string) => {
     const user = users.find((u) => u.email === email);
     if (user) {
@@ -60,6 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // Logout and clear 
   const logout = () => {
     setIsLoggedIn(false);
     setCurrentUser(null);
@@ -69,7 +77,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ isSignedUp, isLoggedIn, users, currentUser, completeSignup, completeLogin, logout }}
+      value={{
+        isSignedUp,
+        isLoggedIn,
+        users,
+        currentUser,
+        completeSignup,
+        completeLogin,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
