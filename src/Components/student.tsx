@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../App.css";
 
+
 interface Student {
   student_id: number;
   name: string;
@@ -48,6 +49,9 @@ function Student() {
 
   const cacheRef = useRef<Record<string, { data: Student[]; total: number }>>({});
 
+  const sortRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+
   // Debounce helper
   const debounce = (fn: Function, delay = 500) => {
     let timer: any;
@@ -94,7 +98,7 @@ function Student() {
     }
   };
 
-  // Fetch current and next page (pre-fetch)
+  // Fetch current and next page
   useEffect(() => {
     fetchStudents(currentPage);
     const nextPage = currentPage + 1;
@@ -129,11 +133,26 @@ function Student() {
     setCurrentPage(1);
   };
 
-  // Filter input change (debounced)
+  // Filter 
   const handleFilterChange = debounce((field: string, value: string) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
     setCurrentPage(1);
   }, 500);
+
+    useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setShowSortOptions(false);
+      }
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setShowFilterOptions(false);
+        setActiveFilter(null);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
     <>
@@ -142,84 +161,97 @@ function Student() {
       {/* ACTION BUTTONS */}
       <div className="action-buttons">
         {/* SORT DROPDOWN */}
-        <button
-          onClick={() => setShowSortOptions((v) => !v)}
-          className={`dropdown-button ${sortField ? "active" : ""}`}
-        >
-          Sort {sortField && <span className="dot"></span>}
-        </button>
-        {showSortOptions && (
-          <div className="dropdown-options">
-            {SORT_FIELDS.map((field) => (
-              <button
-                key={field}
-                onClick={() => handleSortClick(field)}
-                className={sortField === field ? "highlighted" : ""}
-              >
-                {sortField === field ? `Sort by ${field} (${sortOrder})` : `Sort by ${field}`}
-              </button>
-            ))}
-          </div>
-        )}
+        <div ref={sortRef} className="dropdown-container">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowSortOptions((v) => !v);
+            }}
+            className={`dropdown-button ${sortField ? "active" : ""}`}
+          >
+            Sort {sortField && <span className="dot"></span>}
+          </button>
+          {showSortOptions && (
+            <div className="dropdown-options">
+              {SORT_FIELDS.map((field) => (
+                <button
+                  key={field}
+                  onClick={() => handleSortClick(field)}
+                  className={sortField === field ? "highlighted" : ""}
+                >
+                  {sortField === field ? `Sort by ${field} (${sortOrder})` : `Sort by ${field}`}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* FILTER DROPDOWN */}
-        <button
-          onClick={() => setShowFilterOptions((v) => !v)}
-          className={`dropdown-button ${activeFilter ? "active" : ""}`}
-        >
-          Filter {activeFilter && <span className="dot"></span>}
-        </button>
-        {showFilterOptions && (
-          <div className="dropdown-options">
-            {FILTER_FIELDS.map((field) => (
-              <button
-                key={field}
-                onClick={() => handleFilterClick(field)}
-                className={activeFilter === field ? "highlighted" : ""}
-              >
-                Filter by {field}
-              </button>
-            ))}
+        <div ref={filterRef} className="dropdown-container">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowFilterOptions((v) => !v);
+            }}
+            className={`dropdown-button ${activeFilter ? "active" : ""}`}
+          >
+            Filter {activeFilter && <span className="dot"></span>}
+          </button>
+          {showFilterOptions && (
+            <div className="dropdown-options">
+              {FILTER_FIELDS.map((field) => (
+                <button
+                  key={field}
+                  onClick={() => handleFilterClick(field)}
+                  className={activeFilter === field ? "highlighted" : ""}
+                >
+                  Filter by {field}
+                </button>
+              ))}
 
-            {activeFilter && (
-              <div className="filter-input">
-                <input
-                  type={activeFilter === "age" ? "number" : "text"}
-                  defaultValue={filters[activeFilter]}
-                  onChange={(e) => handleFilterChange(activeFilter, e.target.value)}
-                  placeholder={`Enter ${activeFilter}`}
-                />
-              </div>
-            )}
-          </div>
-        )}
+              {activeFilter && (
+                <div className="filter-input">
+                  <input
+                    type={activeFilter === "age" ? "number" : "text"}
+                    defaultValue={filters[activeFilter]}
+                    onChange={(e) => handleFilterChange(activeFilter, e.target.value)}
+                    placeholder={`Enter ${activeFilter}`}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* TABLE */}
-      <table border={2}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Age</th>
-            <th>Gender</th>
-            <th>Date of Birth</th>
-            <th>City</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((student) => (
-            <tr key={student.student_id}>
-              <td>{student.student_id}</td>
-              <td>{student.name}</td>
-              <td>{student.age}</td>
-              <td>{student.gender}</td>
-              <td>{new Date(student.date_of_birth).toLocaleDateString()}</td>
-              <td>{student.city}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Date of Birth</th>
+                <th>City</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((student) => (
+                <tr key={student.student_id}>
+                  <td>{student.student_id}</td>
+                  <td>{student.name}</td>
+                  <td>{student.age}</td>
+                  <td>{student.gender}</td>
+                  <td>{new Date(student.date_of_birth).toLocaleDateString()}</td>
+                  <td>{student.city}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
 
       {/* PAGINATION */}
       <div className="pagination-controls">
