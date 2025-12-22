@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useContext } from "react";
+import bcrypt from "bcryptjs";
 
 type User = {
   email: string;
@@ -10,8 +11,8 @@ type AuthContextType = {
   isLoggedIn: boolean;
   users: User[];
   currentUser: User | null;
-  completeSignup: (email: string, password: string) => void;
-  completeLogin: (email: string) => void;
+  completeSignup: (email: string, password: string) => Promise<void>;
+  completeLogin: (email: string, password: string) => void;
   logout: () => void;
 };
 
@@ -42,32 +43,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const user = userList.find((u) => u.email === savedEmail);
       if (user) {
         setCurrentUser(user);
-        setIsLoggedIn(true); 
+        setIsLoggedIn(true);
       }
     }
-  }, []); 
+  }, []);
 
+  // Update completeSignup to hash the password before saving it
+  const completeSignup = (email: string, password: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const hashedPassword = bcrypt.hashSync(password, 10); // Hash the password
+        const newUser = { email, password: hashedPassword };
+        const updatedUsers = [...users, newUser];
+        setUsers(updatedUsers);
+        setIsSignedUp(true);
+        localStorage.setItem("users", JSON.stringify(updatedUsers)); // Save users to localStorage
 
-  const completeSignup = (email: string, password: string) => {
-    const newUser = { email, password };
-    const updatedUsers = [...users, newUser];
-    setUsers(updatedUsers);
-    setIsSignedUp(true);
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
+        resolve(); // Resolve the promise after successful signup
+      } catch (err) {
+        reject(err); // Reject the promise if there's an error
+      }
+    });
   };
 
-  // Login and save
-  const completeLogin = (email: string) => {
+  const completeLogin = (email: string, password: string) => {
     const user = users.find((u) => u.email === email);
-    if (user) {
+    if (user && bcrypt.compareSync(password, user.password)) {
       setCurrentUser(user);
       setIsLoggedIn(true);
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("currentUser", user.email);
+    } else {
+      setIsLoggedIn(false);
+      setCurrentUser(null);
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("currentUser");
     }
   };
 
-  // Logout and clear 
   const logout = () => {
     setIsLoggedIn(false);
     setCurrentUser(null);
