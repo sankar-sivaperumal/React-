@@ -32,117 +32,108 @@ export default function StudentDetails() {
   const [openCourseId, setOpenCourseId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
 
-  // Delete states
   const [confirmStudentId, setConfirmStudentId] = useState<number | null>(null);
   const [loadingDelete, setLoadingDelete] = useState(false);
 
-  // Edit states
   const [editingStudentId, setEditingStudentId] = useState<number | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<Student>>({});
   const [loadingEdit, setLoadingEdit] = useState(false);
 
-  // Fetch courses
+  /* ------------ helpers ------------ */
+
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
+  const fetchCourses = async () => {
+    const res = await fetch("http://localhost:5000/courses/");
+    const courses: Course[] = await res.json();
+    setData(courses);
+    if (courses.length) setOpenCourseId(courses[0].course_id);
+  };
+
   useEffect(() => {
-    fetch("http://localhost:5000/courses/")
-      .then((res) => res.json())
-      .then((courses: Course[]) => {
-        setData(courses);
-        if (courses.length) setOpenCourseId(courses[0].course_id);
-      });
+    fetchCourses();
   }, []);
 
-  const toggle = (id: number) => setOpenCourseId((prev) => (prev === id ? null : id));
+  const toggle = (id: number) =>
+    setOpenCourseId((prev) => (prev === id ? null : id));
 
   const filteredEnrollments = (course: Course) =>
     course.enrollments.filter((e) => {
       const name = e.students?.name ?? "";
       const city = e.students?.city ?? "";
-      const searchTerm = search ?? "";
       return (
-        name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        city.toLowerCase().includes(searchTerm.toLowerCase())
+        name.toLowerCase().includes(search.toLowerCase()) ||
+        city.toLowerCase().includes(search.toLowerCase())
       );
     });
 
-  // Delete student
-const handleDelete = async (studentId: number) => {
-  try {
-    setLoadingDelete(true);
+  /* ------------ delete ------------ */
 
-    const res = await fetch(
-      `http://localhost:5000/students/${studentId}`,
-      { method: "DELETE" }
-    );
+  const handleDelete = async (studentId: number) => {
+    try {
+      setLoadingDelete(true);
 
-    if (!res.ok) throw new Error("Failed to delete student");
+      const res = await fetch(
+        `http://localhost:5000/students/${studentId}`,
+        { method: "DELETE" }
+      );
 
-    setData((prev) =>
-      prev.map((course) => ({
-        ...course,
-        enrollments: course.enrollments.filter(
-          (e) => e.students.student_id !== studentId
-        ),
-      }))
-    );
+      if (!res.ok) throw new Error("Delete failed");
 
-    setConfirmStudentId(null);
+      toast.success("Student deleted successfully");
 
-    toast.success("Student deleted successfully ");
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to delete student ");
-  } finally {
-    setLoadingDelete(false);
-  }
-};
+      setConfirmStudentId(null);
 
+      await sleep(5000);
+      await fetchCourses();
 
-  // Edit Data
-const handleEditSubmit = async () => {
-  if (editingStudentId === null) return;
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete student");
+    } finally {
+      setLoadingDelete(false);
+    }
+  };
 
-  const studentId = Number(editingStudentId);
-  if (isNaN(studentId)) return;
+  /* ------------ edit ------------ */
 
-  try {
-    setLoadingEdit(true);
+  const handleEditSubmit = async () => {
+    if (editingStudentId === null) return;
 
-    // optimistic UI update
-    setData((prev) =>
-      prev.map((course) => ({
-        ...course,
-        enrollments: course.enrollments.map((e) =>
-          e.students.student_id === studentId
-            ? { ...e, students: { ...e.students, ...editFormData } }
-            : e
-        ),
-      }))
-    );
+    try {
+      setLoadingEdit(true);
 
-    const res = await fetch(
-      `http://localhost:5000/students/${studentId}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editFormData),
-      }
-    );
+      const res = await fetch(
+        `http://localhost:5000/students/${editingStudentId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editFormData),
+        }
+      );
 
-    if (!res.ok) throw new Error("Failed to update");
+      if (!res.ok) throw new Error("Update failed");
 
-    setEditingStudentId(null);
-    setEditFormData({});
+      toast.success("Student updated successfully");
 
-    toast.success("Student updated successfully ✨");
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to update student ❌");
-  } finally {
-    setLoadingEdit(false);
-  }
-};
+      setEditingStudentId(null);
+      setEditFormData({});
 
-return (
+      await sleep(1000);
+      await fetchCourses();
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update student");
+    } finally {
+      setLoadingEdit(false);
+    }
+  };
+
+  /* ------------ UI ------------ */
+
+  return (
     <div className="container">
       <h2 className="title">Student Records</h2>
 
@@ -159,62 +150,73 @@ return (
 
         return (
           <div key={course.course_id} className="course-card">
-            <div className="course-header" onClick={() => toggle(course.course_id)}>
-              <span>{course.course_name} — {course.teacher_name}</span>
-              <span>{rows.length} students {isOpen ? "▲" : "▼"}</span>
+            <div
+              className="course-header"
+              onClick={() => toggle(course.course_id)}
+            >
+              <span>
+                {course.course_name} — {course.teacher_name}
+              </span>
+              <span>
+                {rows.length} students {isOpen ? "▲" : "▼"}
+              </span>
             </div>
 
             {isOpen && (
               <div className="table-wrapper">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Enroll ID</th>
-                    <th>Name</th>
-                    <th>Marks</th>
-                    <th>Age</th>
-                    <th>Gender</th>
-                    <th>City</th>
-                    <th>DOB</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((e) => (
-                    <tr key={e.enrollment_id}>
-                      <td>{e.enrollment_id}</td>
-                      <td>{e.students.name}</td>
-                      <td>{e.marks}</td>
-                      <td>{e.students.age}</td>
-                      <td>{e.students.gender}</td>
-                      <td>{e.students.city}</td>
-                      <td>{e.students.date_of_birth}</td>
-                      <td>
-                        <button
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Enroll ID</th>
+                      <th>Name</th>
+                      <th>Marks</th>
+                      <th>Age</th>
+                      <th>Gender</th>
+                      <th>City</th>
+                      <th>DOB</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((e) => (
+                      <tr key={e.enrollment_id}>
+                        <td>{e.enrollment_id}</td>
+                        <td>{e.students.name}</td>
+                        <td>{e.marks}</td>
+                        <td>{e.students.age}</td>
+                        <td>{e.students.gender}</td>
+                        <td>{e.students.city}</td>
+                        <td>{e.students.date_of_birth}</td>
+                        <td>
+                          <button
                             className="btn-edit"
+                            disabled={loadingEdit}
                             onClick={() => {
-                              if (e.students.student_id != null) {
-                                setEditingStudentId(e.students.student_id);
-                                setEditFormData({ ...e.students });
-                              } else {
-                                console.error("Invalid student_id:", e.students);
-                              }
+                              setEditingStudentId(e.students.student_id);
+                              setEditFormData({ ...e.students });
                             }}
                           >
                             Edit
                           </button>
 
-                        <button
-                          className="btn-delete"
-                          onClick={() => setConfirmStudentId(e.students.student_id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          <button
+                            className="btn-delete"
+                            disabled={loadingDelete}
+                            onClick={() =>
+                              setConfirmStudentId(e.students.student_id)
+                            }
+                          >
+                            {loadingDelete ? (
+                              <span className="loader" />
+                            ) : (
+                              "Delete"
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
@@ -225,7 +227,10 @@ return (
         open={confirmStudentId !== null}
         loading={loadingDelete}
         onCancel={() => setConfirmStudentId(null)}
-        onConfirm={() => confirmStudentId !== null && handleDelete(confirmStudentId)}
+        onConfirm={() =>
+          confirmStudentId !== null &&
+          handleDelete(confirmStudentId)
+        }
       />
 
       <EditStudentModal
@@ -236,8 +241,12 @@ return (
         onCancel={() => setEditingStudentId(null)}
         onSave={handleEditSubmit}
       />
+
+      {(loadingDelete || loadingEdit) && (
+        <div className="overlay">
+          <span className="loader" style={{ width: 40, height: 40 }} />
+        </div>
+      )}
     </div>
   );
 }
-
-
