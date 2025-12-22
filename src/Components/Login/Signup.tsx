@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Access/AuthContext"; 
+import { useAuth } from "../Access/AuthContext";
 
 function Signup() {
   const navigate = useNavigate();
-  const { completeSignup } = useAuth(); 
+  const { completeSignup } = useAuth();
 
+  const [email, setEmail] = useState("");
   const [pwd1, setPwd1] = useState("");
   const [pwd2, setPwd2] = useState("");
   const [match, setMatch] = useState(true);
 
   function handlePwd1Change(event: React.ChangeEvent<HTMLInputElement>) {
     setPwd1(event.target.value);
+    setMatch(event.target.value === pwd2);
   }
 
   function handlePwd2Change(event: React.ChangeEvent<HTMLInputElement>) {
@@ -24,8 +26,8 @@ function Signup() {
     event.preventDefault();
     if (!match) return;
 
-    completeSignup();        
-    navigate("/login");        
+    completeSignup(email, pwd1);
+    navigate("/login");
   }
 
   return (
@@ -38,7 +40,13 @@ function Signup() {
 
       <div className="mb-3">
         <label className="form-label">Email address</label>
-        <input type="email" className="form-control" required />
+        <input
+          type="email"
+          className="form-control"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
       </div>
 
       <div className="mb-3">
