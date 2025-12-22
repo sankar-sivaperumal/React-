@@ -10,6 +10,9 @@ function Signup() {
   const [pwd1, setPwd1] = useState("");
   const [pwd2, setPwd2] = useState("");
   const [match, setMatch] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); 
 
   function handlePwd1Change(e: React.ChangeEvent<HTMLInputElement>) {
     setPwd1(e.target.value);
@@ -26,8 +29,31 @@ function Signup() {
     e.preventDefault();
     if (!match) return;
 
-    completeSignup(email, pwd1);
-    navigate("/login");
+    // Basic password length validation
+    if (pwd1.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    // Handle signup with Promise
+    completeSignup(email, pwd1)
+      .then(() => {
+        navigate("/login");
+      })
+      .catch((err: unknown) => {
+        setError("An error occurred. Please try again later.");
+        if (err instanceof Error) {
+          console.error(err.message); 
+        } else {
+          console.error(err); 
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   return (
@@ -48,19 +74,28 @@ function Signup() {
 
         <div className="mb-3">
           <label className="form-label">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            required
-            value={pwd1}
-            onChange={handlePwd1Change}
-          />
+          <div className="password-field">
+            <input
+              type={showPassword ? "text" : "password"} 
+              className="form-control"
+              required
+              value={pwd1}
+              onChange={handlePwd1Change}
+            />
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={() => setShowPassword(!showPassword)} 
+              style={{ marginLeft: "8px" }}
+            />
+            <label style={{ marginLeft: "5px" }}>Show Password</label>
+          </div>
         </div>
 
         <div className="mb-3">
           <label className="form-label">Confirm Password</label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"} 
             className="form-control"
             required
             value={pwd2}
@@ -74,6 +109,12 @@ function Signup() {
           </p>
         )}
 
+        {error && (
+          <p style={{ color: "red", fontSize: "14px" }}>
+            {error}
+          </p>
+        )}
+
         <div className="mb-3 form-check">
           <input type="checkbox" className="form-check-input" required />
           <label className="form-check-label">I Agree</label>
@@ -82,9 +123,9 @@ function Signup() {
         <button
           type="submit"
           className="btn btn-primary w-100"
-          disabled={!match}
+          disabled={!match || loading}
         >
-          Create Account
+          {loading ? "Creating Account..." : "Create Account"}
         </button>
 
         <p className="text-center mt-3 mb-0">

@@ -2,6 +2,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../Access/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
+import bcrypt from "bcryptjs";
 
 function Login() {
   const navigate = useNavigate();
@@ -10,26 +11,41 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); 
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
 
     if (!isSignedUp) {
-      setError("Please signup first");
+      setError("Please signup first.");
       return;
     }
 
-    const user = users.find(
-      (u) => u.email === email && u.password === password
-    );
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email.");
+      return;
+    }
+
+    // Find user by email
+    const user = users.find((u) => u.email === email);
 
     if (!user) {
-      setError("Invalid email or password");
+      setError("Invalid credentials");
       return;
     }
 
-    completeLogin(user.email);
+    // Check hashed password
+    if (!bcrypt.compareSync(password, user.password)) {
+      setError("Invalid credentials");
+      return;
+    }
+
+    setLoading(true);
+    completeLogin(user.email, password); 
     toast.success(`Logged in as ${user.email}`);
     navigate("/Formpage");
   }
@@ -56,17 +72,30 @@ function Login() {
 
         <div className="mb-3">
           <label className="form-label">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="password-field">
+            <input
+              type={showPassword ? "text" : "password"} 
+              className="form-control"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={() => setShowPassword(!showPassword)} 
+              style={{ marginLeft: "8px" }}
+            />
+            <label style={{ marginLeft: "5px" }}>Show Password</label>
+          </div>
         </div>
 
-        <button type="submit" className="btn btn-primary w-100 mb-3">
-          Login
+        <button
+          type="submit"
+          className="btn btn-primary w-100 mb-3"
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <p className="text-center mb-0">
