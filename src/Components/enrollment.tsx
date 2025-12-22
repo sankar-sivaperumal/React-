@@ -60,7 +60,9 @@ function Enrollment() {
     <>
       <h2>Enrollments</h2>
 
-      <table border={2}>
+    {/* ENROLLMENT TABLE */}
+    <div className="table-wrapper">
+      <table>
         <thead>
           <tr>
             <th>Enrollment ID</th>
@@ -81,11 +83,15 @@ function Enrollment() {
             ))
           ) : (
             <tr>
-              <td colSpan={4}>Loading...</td> 
+              <td colSpan={4} style={{ textAlign: "center" }}>
+                Loading...
+              </td>
             </tr>
           )}
         </tbody>
       </table>
+    </div>
+
 
       {/* PAGINATION CONTROLS */}
       <div className="pagination-controls">

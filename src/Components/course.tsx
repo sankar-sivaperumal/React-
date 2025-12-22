@@ -24,25 +24,26 @@ function Courses() {
   return (
     <>
       <h2>Courses</h2>
-      
-      <table border={2}>
-        <thead>
-          <tr>
-            <th>Course ID</th>
-            <th>Course Name</th>
-            <th>Teacher Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((course) => (
-            <tr key={course.course_id}>
-              <td>{course.course_id}</td>
-              <td>{course.course_name}</td>
-              <td>{course.teacher_name}</td>
+      <div className="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Course ID</th>
+              <th>Course Name</th>
+              <th>Teacher Name</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((course) => (
+              <tr key={course.course_id}>
+                <td>{course.course_id}</td>
+                <td>{course.course_name}</td>
+                <td>{course.teacher_name}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
