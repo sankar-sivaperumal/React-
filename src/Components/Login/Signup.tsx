@@ -11,19 +11,19 @@ function Signup() {
   const [pwd2, setPwd2] = useState("");
   const [match, setMatch] = useState(true);
 
-  function handlePwd1Change(event: React.ChangeEvent<HTMLInputElement>) {
-    setPwd1(event.target.value);
-    setMatch(event.target.value === pwd2);
+  function handlePwd1Change(e: React.ChangeEvent<HTMLInputElement>) {
+    setPwd1(e.target.value);
+    setMatch(e.target.value === pwd2);
   }
 
-  function handlePwd2Change(event: React.ChangeEvent<HTMLInputElement>) {
-    const value = event.target.value;
+  function handlePwd2Change(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
     setPwd2(value);
     setMatch(pwd1 === value);
   }
 
-  function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     if (!match) return;
 
     completeSignup(email, pwd1);
@@ -31,75 +31,73 @@ function Signup() {
   }
 
   return (
-    <form
-      className="my-5"
-      style={{ width: "25%", margin: "auto" }}
-      onSubmit={handleSubmit}
-    >
-      <h1 style={{ textAlign: "center" }}>Signup</h1>
+    <div className="auth-wrapper">
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h1>Signup</h1>
 
-      <div className="mb-3">
-        <label className="form-label">Email address</label>
-        <input
-          type="email"
-          className="form-control"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
+        <div className="mb-3">
+          <label className="form-label">Email address</label>
+          <input
+            type="email"
+            className="form-control"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
 
-      <div className="mb-3">
-        <label className="form-label">Password</label>
-        <input
-          value={pwd1}
-          onChange={handlePwd1Change}
-          type="password"
-          className="form-control"
-          required
-        />
-      </div>
+        <div className="mb-3">
+          <label className="form-label">Password</label>
+          <input
+            type="password"
+            className="form-control"
+            required
+            value={pwd1}
+            onChange={handlePwd1Change}
+          />
+        </div>
 
-      <div className="mb-3">
-        <label className="form-label">Confirm Password</label>
-        <input
-          value={pwd2}
-          onChange={handlePwd2Change}
-          type="password"
-          className="form-control"
-          required
-        />
-      </div>
+        <div className="mb-3">
+          <label className="form-label">Confirm Password</label>
+          <input
+            type="password"
+            className="form-control"
+            required
+            value={pwd2}
+            onChange={handlePwd2Change}
+          />
+        </div>
 
-      {!match && (
-        <p style={{ color: "red", fontSize: "14px" }}>
-          Passwords do not match
-        </p>
-      )}
+        {!match && (
+          <p style={{ color: "red", fontSize: "14px" }}>
+            Passwords do not match
+          </p>
+        )}
 
-      <div className="mb-3 form-check">
-        <input type="checkbox" className="form-check-input" required />
-        <label className="form-check-label">I Agree</label>
-      </div>
+        <div className="mb-3 form-check">
+          <input type="checkbox" className="form-check-input" required />
+          <label className="form-check-label">I Agree</label>
+        </div>
 
-      <button
-        type="submit"
-        className="btn btn-primary w-100"
-        disabled={!match}
-      >
-        Create Account
-      </button>
-
-      <p style={{ textAlign: "center", marginTop: "10px" }}>
-        Already have an account?{" "}
-        <span
-          style={{ color: "blue", cursor: "pointer" }}
-          onClick={() => navigate("/login")}
+        <button
+          type="submit"
+          className="btn btn-primary w-100"
+          disabled={!match}
         >
-          Login
-        </span>
-      </p>
-    </form>
+          Create Account
+        </button>
+
+        <p className="text-center mt-3 mb-0">
+          Already have an account?{" "}
+          <span
+            style={{ color: "#0d6efd", cursor: "pointer" }}
+            onClick={() => navigate("/login")}
+          >
+            Login
+          </span>
+        </p>
+      </form>
+    </div>
   );
 }
 

@@ -20,7 +20,10 @@ function Login() {
       return;
     }
 
-    const user = users.find((u) => u.email === email && u.password === password);
+    const user = users.find(
+      (u) => u.email === email && u.password === password
+    );
+
     if (!user) {
       setError("Invalid email or password");
       return;
@@ -32,52 +35,48 @@ function Login() {
   }
 
   return (
-    <form
-      className="my-5 p-4 border rounded shadow-sm"
-      style={{ width: "25%", margin: "auto" }}
-      onSubmit={handleSubmit}
-    >
-      <h1 className="text-center mb-4">Login</h1>
+    <div className="auth-wrapper">
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h1>Login</h1>
 
-      {error && (
-        <p style={{ color: "red", textAlign: "center", marginBottom: "10px" }}>
-          {error}
+        {error && (
+          <p style={{ color: "red", textAlign: "center" }}>{error}</p>
+        )}
+
+        <div className="mb-3">
+          <label className="form-label">Email address</label>
+          <input
+            type="email"
+            className="form-control"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Password</label>
+          <input
+            type="password"
+            className="form-control"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        <button type="submit" className="btn btn-primary w-100 mb-3">
+          Login
+        </button>
+
+        <p className="text-center mb-0">
+          Don&apos;t have an account?{" "}
+          <Link to="/signup" className="text-decoration-none">
+            Sign up
+          </Link>
         </p>
-      )}
-
-      <div className="mb-3">
-        <label className="form-label">Email address</label>
-        <input
-          type="email"
-          className="form-control"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-
-      <div className="mb-3">
-        <label className="form-label">Password</label>
-        <input
-          type="password"
-          className="form-control"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
-
-      <button type="submit" className="btn btn-primary w-100 mb-3">
-        Login
-      </button>
-
-      <p className="text-center mb-0">
-        Don&apos;t have an account?{" "}
-        <Link to="/signup" className="text-decoration-none">
-          Sign up
-        </Link>
-      </p>
-    </form>
+      </form>
+    </div>
   );
 }
 
