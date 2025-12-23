@@ -19,7 +19,7 @@ const FormPage: React.FC = () => {
     Partial<Record<keyof typeof data, string>>
   >({});
 
-  /*  AGE CALCULATION  */
+  /* AGE CALCULATION */
   const calculateAge = (dob: string) => {
     if (!dob) return "";
 
@@ -39,99 +39,69 @@ const FormPage: React.FC = () => {
     return age;
   };
 
-  /*  HANDLE CHANGE  */
+  /* HANDLE CHANGE */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
-    // DOB → auto calculate age
     if (name === "date_of_birth") {
-      const age = calculateAge(value);
-
       updateData({
         date_of_birth: value,
-        age: age,
+        age: calculateAge(value),
       });
-    }
-    // Marks (decimal)
-    else if (name === "marks") {
+    } else if (name === "marks") {
       updateData({ [name]: value as any });
-    }
-    // Numeric fields
-    else if (name === "course_id") {
+    } else if (name === "course_id") {
       updateData({ [name]: value === "" ? "" : Number(value) });
-    }
-    // Other fields
-    else {
+    } else {
       updateData({ [name]: value as any });
     }
 
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  /*  STEP VALIDATION  */
+  /* STEP VALIDATION */
   const validateStep = () => {
     let currentErrors: Partial<Record<keyof typeof data, string>> = {};
     let isValid = true;
 
     if (step === 1) {
-      if (!data.name) {
-        currentErrors.name = validationMessages.required;
-        isValid = false;
-      }
-      if (!data.age) {
-        currentErrors.age = validationMessages.required;
-        isValid = false;
-      }
-      if (!data.gender) {
-        currentErrors.gender = validationMessages.required;
-        isValid = false;
-      }
-      if (!data.city) {
-        currentErrors.city = validationMessages.required;
-        isValid = false;
-      }
-      if (!data.date_of_birth) {
+      if (!data.name) currentErrors.name = validationMessages.required;
+      if (!data.age) currentErrors.age = validationMessages.required;
+      if (!data.gender) currentErrors.gender = validationMessages.required;
+      if (!data.city) currentErrors.city = validationMessages.required;
+      if (!data.date_of_birth)
         currentErrors.date_of_birth = validationMessages.required;
-        isValid = false;
-      }
-    } else if (step === 2) {
-      if (!data.course_id) {
-        currentErrors.course_id = validationMessages.selectCourse;
-        isValid = false;
-      }
 
-      if (data.marks !== "" && isNaN(Number(data.marks))) {
+      isValid = Object.keys(currentErrors).length === 0;
+    }
+
+    if (step === 2) {
+      if (!data.course_id)
+        currentErrors.course_id = validationMessages.selectCourse;
+
+      if (data.marks !== "" && isNaN(Number(data.marks)))
         currentErrors.marks = validationMessages.invalidMarks;
-        isValid = false;
-      }
+
+      isValid = Object.keys(currentErrors).length === 0;
     }
 
     setErrors(currentErrors);
     return isValid;
   };
 
-  const handleNext = () => {
-    if (validateStep()) setStep(step + 1);
-  };
-
+  const handleNext = () => validateStep() && setStep(step + 1);
   const handleBack = () => setStep(step - 1);
 
-  /* SAVE & SUBMIT */
+  /* SAVE */
   const handleSave = async () => {
-    const calculatedAge = calculateAge(data.date_of_birth);
-
-    const marksString =
-      data.marks !== "" && data.marks !== undefined && data.marks !== null
-        ? parseFloat(data.marks.toString()).toFixed(2)
-        : undefined;
-
     const payload = {
       ...data,
-      age: calculatedAge,
+      age: calculateAge(data.date_of_birth),
       course_id: data.course_id ? Number(data.course_id) : undefined,
-      marks: marksString,
+      marks:
+        data.marks !== "" ? Number(data.marks).toFixed(2) : undefined,
     };
 
     try {
@@ -141,7 +111,6 @@ const FormPage: React.FC = () => {
       setStep(1);
       navigate("/student");
     } catch (error: any) {
-      console.error("Validation Error:", error.response?.data);
       alert(
         "Failed to save: " +
           (error.response?.data?.message || "Check your data")
@@ -151,69 +120,86 @@ const FormPage: React.FC = () => {
 
   return (
     <div>
-   
       {step === 1 && (
         <div className="form-container">
           <h2>Student Details</h2>
 
           <div className="form">
             {/* Name */}
-            <div className="form-group">
-              <label>
+              <div className="form-group">
+              <label htmlFor="name">
                 Name <span className="required">*</span>
               </label>
-              <input name="name" value={data.name} onChange={handleChange} />
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={data.name}
+                onChange={handleChange}
+                autoComplete="name"
+              />
               {errors.name && (
                 <div className="error-message">{errors.name}</div>
               )}
             </div>
 
-            {/* Age (AUTO CALCULATED) */}
+
+            {/* Age */}
             <div className="form-group">
-              <label>
-                Age <span className="required">*</span>
-              </label>
+             <label htmlFor="age">
+              Age <span className="required">*</span>
+            </label>
               <input
-                type="number"
+                id="age"
                 name="age"
+                type="number"
                 value={data.age}
                 readOnly
               />
-              {errors.age && (
-                <div className="error-message">{errors.age}</div>
-              )}
             </div>
 
             {/* Gender */}
-            <div className="form-group">
-              <label>
-                Gender <span className="required">*</span>
-              </label>
-              <div className="gender-options">
-                {["M", "F", "Other"].map((g) => (
-                  <label key={g}>
-                    <input
-                      type="radio"
-                      name="gender"
-                      value={g}
-                      checked={data.gender === g}
-                      onChange={handleChange}
-                    />
-                    {g === "M" ? "Male" : g === "F" ? "Female" : "Other"}
-                  </label>
-                ))}
-              </div>
-              {errors.gender && (
-                <div className="error-message">{errors.gender}</div>
-              )}
+          <div className="form-group">
+          <fieldset className="gender-options">
+            <legend>
+            Gender <span className="required">*</span>
+           </legend>
+          <div className="radio-group-wrapper"> 
+          {[
+            { value: "M", label: "Male" },
+            { value: "F", label: "Female" },
+            { value: "Other", label: "Other" },
+          ].map((g) => (
+            <label key={g.value} htmlFor={`gender-${g.value}`}>
+              <input
+                type="radio"
+                id={`gender-${g.value}`}
+                name="gender"
+                value={g.value}
+                checked={data.gender === g.value}
+                onChange={handleChange}
+              />
+              {g.label}
+            </label>
+              ))}
             </div>
+            </fieldset>
+            {errors.gender && (
+                <div className="error-message">{errors.gender}</div>
+            )}
+        </div>
 
-            {/* City */}
+          {/* City */}
             <div className="form-group">
-              <label>
+              <label htmlFor="city">
                 City <span className="required">*</span>
               </label>
-              <select name="city" value={data.city} onChange={handleChange}>
+              <select
+                id="city"
+                name="city"
+                value={data.city}
+                onChange={handleChange}
+              >
                 <option value="">Select City</option>
                 <option value="Tirunelveli">Tirunelveli</option>
                 <option value="Chennai">Chennai</option>
@@ -229,10 +215,11 @@ const FormPage: React.FC = () => {
 
             {/* DOB */}
             <div className="form-group">
-              <label>
+              <label htmlFor="date_of_birth">
                 Date of Birth <span className="required">*</span>
               </label>
               <input
+                id="date_of_birth"
                 type="date"
                 name="date_of_birth"
                 value={data.date_of_birth}
@@ -245,26 +232,22 @@ const FormPage: React.FC = () => {
               )}
             </div>
 
-            <div className="action-buttons">
-              <button className="primary-button" onClick={handleNext}>
-                Next
-              </button>
-            </div>
+            <button className="primary-button" onClick={handleNext}>
+              Next
+            </button>
           </div>
         </div>
       )}
 
-     
       {step === 2 && (
         <div className="form-container">
           <h2>Course Selection</h2>
 
           <div className="form">
             <div className="form-group">
-              <label>
-                Course <span className="required">*</span>
-              </label>
+              <label htmlFor="course_id">Course *</label>
               <select
+                id="course_id"
                 name="course_id"
                 value={data.course_id}
                 onChange={handleChange}
@@ -282,8 +265,9 @@ const FormPage: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label>Marks (Decimal allowed)</label>
+              <label htmlFor="marks">Marks</label>
               <input
+                id="marks"
                 type="number"
                 step="0.01"
                 name="marks"
@@ -295,45 +279,37 @@ const FormPage: React.FC = () => {
               )}
             </div>
 
-            <div className="action-buttons">
-              <button className="back-button" onClick={handleBack}>
-                Back
-              </button>
-              <button className="primary-button" onClick={handleNext}>
-                Next
-              </button>
-            </div>
+            <button className="back-button" onClick={handleBack}>
+              Back
+            </button>
+            <button className="primary-button" onClick={handleNext}>
+              Next
+            </button>
           </div>
         </div>
       )}
 
-     
       {step === 3 && (
-<div className="form-container">
-  <h2>Preview & Confirm</h2>
+        <div className="form-container">
+          <h2>Preview & Confirm</h2>
 
-  <div className="form">
-      <div className="preview-container">
-      <p><strong>Name:</strong> {data.name}</p>
-      <p><strong>Age:</strong> {data.age}</p>
-      <p><strong>Gender:</strong> {data.gender}</p>
-      <p><strong>City:</strong> {data.city}</p>
-      <p><strong>DOB:</strong> {data.date_of_birth}</p>
-      <p><strong>Course ID:</strong> {data.course_id}</p>
-      <p><strong>Marks:</strong> {data.marks || "N/A"}</p>
-    </div>
+          <div className="form">
+            <p><strong>Name:</strong> {data.name}</p>
+            <p><strong>Age:</strong> {data.age}</p>
+            <p><strong>Gender:</strong> {data.gender}</p>
+            <p><strong>City:</strong> {data.city}</p>
+            <p><strong>DOB:</strong> {data.date_of_birth}</p>
+            <p><strong>Course:</strong> {data.course_id}</p>
+            <p><strong>Marks:</strong> {data.marks || "N/A"}</p>
 
-    <div className="action-buttons">
-      <button className="back-button" onClick={handleBack}>
-        Back
-      </button>
-      <button className="confirm-button" onClick={handleSave}>
-        Confirm & Submit
-      </button>
-    </div>
-  </div>
-</div>
-
+            <button className="back-button" onClick={handleBack}>
+              Back
+            </button>
+            <button className="confirm-button" onClick={handleSave}>
+              Confirm & Submit
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
