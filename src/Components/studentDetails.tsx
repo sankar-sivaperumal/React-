@@ -3,6 +3,7 @@ import ConfirmDeleteModal from "../Components/Model/ConfirmDeleteModal";
 import EditStudentModal from "../Components/Model/EditModel";
 import { toast } from "react-toastify";
 import "../App.css";
+import api from "./Forms/api";
 
 interface Student {
   student_id: number;
@@ -31,24 +32,24 @@ export default function StudentDetails() {
   const [data, setData] = useState<Course[]>([]);
   const [openCourseId, setOpenCourseId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-
   const [confirmStudentId, setConfirmStudentId] = useState<number | null>(null);
   const [loadingDelete, setLoadingDelete] = useState(false);
-
   const [editingStudentId, setEditingStudentId] = useState<number | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<Student>>({});
   const [loadingEdit, setLoadingEdit] = useState(false);
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  // Helpers 
 
-  const sleep = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
-
+  // 2. Fetch logic using 'api' instance
   const fetchCourses = async () => {
-    const res = await fetch("http://localhost:5000/courses/");
-    const courses: Course[] = await res.json();
-    setData(courses);
-    if (courses.length) setOpenCourseId(courses[0].course_id);
+    try {
+      const res = await api.get("/courses/");
+      const courses: Course[] = res.data; 
+      setData(courses);
+      if (courses.length && openCourseId === null) setOpenCourseId(courses[0].course_id);
+    } catch (err: any) {
+      console.error("Fetch failed:", err.response?.data || err.message);
+    }
   };
 
   useEffect(() => {
@@ -68,63 +69,43 @@ export default function StudentDetails() {
       );
     });
 
- //Delete
-
+  // 3. DELETE function using 'api'
   const handleDelete = async (studentId: number) => {
     try {
       setLoadingDelete(true);
-
-      const res = await fetch(
-        `http://localhost:5000/students/${studentId}`,
-        { method: "DELETE" }
-      );
-
-      if (!res.ok) throw new Error("Delete failed");
+      
+      await api.delete(`/students/${studentId}`);
 
       toast.success("Student deleted successfully");
-
       setConfirmStudentId(null);
 
-      await sleep(5000);
-      await fetchCourses();
-
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete student");
+      await sleep(3000);
+      await fetchCourses(); 
+    } catch (err: any) {
+      console.error("Delete failed:", err.response?.data || err.message);
+      toast.error("Failed to delete student: Unauthorized");
     } finally {
       setLoadingDelete(false);
     }
   };
 
-  //Edit
+  // 4. EDIT/PUT function using 'api'
   const handleEditSubmit = async () => {
     if (editingStudentId === null) return;
 
     try {
       setLoadingEdit(true);
-
-      const res = await fetch(
-        `http://localhost:5000/students/${editingStudentId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editFormData),
-        }
-      );
-
-      if (!res.ok) throw new Error("Update failed");
+      
+      await api.put(`/students/${editingStudentId}`, editFormData);
 
       toast.success("Student updated successfully");
-
       setEditingStudentId(null);
       setEditFormData({});
-
-      await sleep(1000);
-      await fetchCourses();
-
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update student");
+      await sleep(2000);
+      await fetchCourses(); 
+    } catch (err: any) {
+      console.error("Update failed:", err.response?.data || err.message);
+      toast.error("Failed to update student: Unauthorized");
     } finally {
       setLoadingEdit(false);
     }
