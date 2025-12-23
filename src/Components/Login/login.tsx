@@ -1,109 +1,104 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../Access/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
-import bcrypt from "bcryptjs";
+import api from "../Forms/api";
 
 function Login() {
   const navigate = useNavigate();
-  const { completeLogin, isSignedUp, users } = useAuth();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); 
 
-  function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setError("");
-
-    if (!isSignedUp) {
-      setError("Please signup first.");
-      return;
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError("Please enter a valid email.");
-      return;
-    }
-
-    // Find user by email
-    const user = users.find((u) => u.email === email);
-
-    if (!user) {
-      setError("Invalid credentials");
-      return;
-    }
-
-    // Check hashed password
-    if (!bcrypt.compareSync(password, user.password)) {
-      setError("Invalid credentials");
-      return;
-    }
-
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setLoading(true);
-    completeLogin(user.email, password); 
-    toast.success(`Logged in as ${user.email}`);
-    navigate("/Formpage");
+
+    try {
+      const res = await api.post("/auth/login", { email, password });
+
+      login(email, res.data.access_token);
+      toast.success(`Logged in as ${email}`);
+
+      navigate("/Formpage");
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Login failed";
+      toast.error(Array.isArray(errorMessage) ? errorMessage[0] : errorMessage);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div className="auth-wrapper">
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <h1>Login</h1>
+    <div className="auth-wrapper mt-5 d-flex justify-content-center">
+      <form
+        className="auth-form p-4 border rounded shadow bg-white"
+        style={{ width: "400px" }}
+        onSubmit={handleSubmit}
+      >
+        <h1 className="text-center mb-4">Login</h1>
 
-        {error && (
-          <p style={{ color: "red", textAlign: "center" }}>{error}</p>
-        )}
-
+        {/* Email */}
         <div className="mb-3">
-          <label className="form-label">Email address</label>
+          <label className="form-label">Email</label>
           <input
             type="email"
-            className="form-control"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="form-control"
           />
         </div>
 
+        {/* Password */}
         <div className="mb-3">
           <label className="form-label">Password</label>
-          <div className="password-field">
+          <div className="password-container">
             <input
-              type={showPassword ? "text" : "password"} 
-              className="form-control"
-              required
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="form-control"
+              required
             />
-            <input
-              type="checkbox"
-              checked={showPassword}
-              onChange={() => setShowPassword(!showPassword)} 
-              style={{ marginLeft: "8px" }}
-            />
-            <label style={{ marginLeft: "5px" }}>Show Password</label>
+            <span
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              <i className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"}`} />
+            </span>
           </div>
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
-          className="btn btn-primary w-100 mb-3"
+          className="btn btn-primary w-100 py-2"
           disabled={loading}
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading ? (
+            <span className="spinner-border spinner-border-sm"></span>
+          ) : (
+            "Login"
+          )}
         </button>
 
-        <p className="text-center mb-0">
-          Don&apos;t have an account?{" "}
-          <Link to="/signup" className="text-decoration-none">
-            Sign up
-          </Link>
-        </p>
+        {/* Signup link */}
+        <div className="text-center mt-3">
+          <p className="mb-0">
+            Don’t have an account?{" "}
+            <button
+              type="button"
+              className="btn btn-link p-0"
+              onClick={() => navigate("/signup")}
+            >
+              Signup
+            </button>
+          </p>
+        </div>
       </form>
     </div>
   );

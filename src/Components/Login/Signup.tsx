@@ -1,68 +1,100 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Access/AuthContext";
+import api from "../Forms/api";
+
+type Strength = "weak" | "medium" | "strong";
 
 function Signup() {
   const navigate = useNavigate();
-  const { completeSignup } = useAuth();
 
   const [email, setEmail] = useState("");
   const [pwd1, setPwd1] = useState("");
   const [pwd2, setPwd2] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmTouched, setConfirmTouched] = useState(false);
+
   const [match, setMatch] = useState(true);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [strength, setStrength] = useState<Strength>("weak");
+
+  const [agree, setAgree] = useState(false);
+  const [agreeError, setAgreeError] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); 
+
+  /* PASSWORD LOGIC WITH STRENGHT*/
+  function getPasswordStrength(password: string): Strength {
+    if (password.length < 8) return "weak";
+
+    const hasUpper = /[A-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
+    if (hasUpper && hasNumber && hasSpecial) return "strong";
+    return "medium";
+  }
 
   function handlePwd1Change(e: React.ChangeEvent<HTMLInputElement>) {
-    setPwd1(e.target.value);
-    setMatch(e.target.value === pwd2);
+    const value = e.target.value;
+    setPwd1(value);
+
+    const s = getPasswordStrength(value);
+    setStrength(s);
+
+    if (value.length < 8) {
+      setPasswordError("Password must be at least 8 characters long.");
+    } else {
+      setPasswordError(null);
+    }
+
+    if (confirmTouched) {
+      setMatch(value === pwd2);
+    }
   }
 
   function handlePwd2Change(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     setPwd2(value);
+    setConfirmTouched(true);
     setMatch(pwd1 === value);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!match) return;
 
-    // Basic password length validation
-    if (pwd1.length < 8) {
-      setError("Password must be at least 8 characters long.");
+    if (!agree) {
+      setAgreeError(true);
       return;
     }
+
+    if (passwordError || !match) return;
 
     setLoading(true);
     setError(null);
 
-    // Handle signup with Promise
-    completeSignup(email, pwd1)
-      .then(() => {
-        navigate("/login");
-      })
-      .catch((err: unknown) => {
-        setError("An error occurred. Please try again later.");
-        if (err instanceof Error) {
-          console.error(err.message); 
-        } else {
-          console.error(err); 
-        }
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      await api.post("/users", {
+        email,
+        password: pwd1,
       });
+      navigate("/login");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Signup failed.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="auth-wrapper">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h1>Signup</h1>
+        <h1 className="text-center mb-4">Signup</h1>
 
+        {/* Email */}
         <div className="mb-3">
-          <label className="form-label">Email address</label>
+          <label>Email</label>
           <input
             type="email"
             className="form-control"
@@ -72,71 +104,119 @@ function Signup() {
           />
         </div>
 
+        {/* Password */}
         <div className="mb-3">
-          <label className="form-label">Password</label>
-          <div className="password-field">
+          <label>Password</label>
+          <div className="password-container">
             <input
-              type={showPassword ? "text" : "password"} 
+              type={showPassword ? "text" : "password"}
               className="form-control"
               required
               value={pwd1}
               onChange={handlePwd1Change}
             />
-            <input
-              type="checkbox"
-              checked={showPassword}
-              onChange={() => setShowPassword(!showPassword)} 
-              style={{ marginLeft: "8px" }}
-            />
-            <label style={{ marginLeft: "5px" }}>Show Password</label>
+            <span
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              <i className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"}`} />
+            </span>
           </div>
+
+          {/* Strength Meter */}
+          {pwd1 && (
+            <div className="password-strength mt-2">
+              <div className={`strength-bar ${strength}`} />
+              <small
+                className={
+                  strength === "weak"
+                    ? "text-danger"
+                    : strength === "medium"
+                    ? "text-warning"
+                    : "text-success"
+                }
+              >
+                Strength: {strength.toUpperCase()}
+              </small>
+            </div>
+          )}
+
+          {passwordError && (
+            <small className="text-danger">{passwordError}</small>
+          )}
         </div>
 
+        {/* Confirm Password */}
         <div className="mb-3">
-          <label className="form-label">Confirm Password</label>
-          <input
-            type={showPassword ? "text" : "password"} 
-            className="form-control"
-            required
-            value={pwd2}
-            onChange={handlePwd2Change}
-          />
+          <label>Confirm Password</label>
+          <div className="password-container">
+            <input
+              type={showPassword ? "text" : "password"}
+              className="form-control"
+              required
+              value={pwd2}
+              onChange={handlePwd2Change}
+            />
+            <span
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              <i className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"}`} />
+            </span>
+          </div>
+
+          {confirmTouched && !match && (
+            <small className="text-danger">Passwords do not match</small>
+          )}
         </div>
 
-        {!match && (
-          <p style={{ color: "red", fontSize: "14px" }}>
-            Passwords do not match
-          </p>
-        )}
-
-        {error && (
-          <p style={{ color: "red", fontSize: "14px" }}>
-            {error}
-          </p>
-        )}
-
+        {/* Agreement */}
         <div className="mb-3 form-check">
-          <input type="checkbox" className="form-check-input" required />
-          <label className="form-check-label">I Agree</label>
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="agree"
+            checked={agree}
+            onChange={(e) => {
+              setAgree(e.target.checked);
+              setAgreeError(false);
+            }}
+          />
+          <label className="form-check-label" htmlFor="agree">
+            I agree 
+          </label>
+          {agreeError && (
+            <small className="text-danger d-block">
+              You must agree before creating an account
+            </small>
+          )}
         </div>
 
+        {/* API Error */}
+        {error && <p className="text-danger">{error}</p>}
+
+        {/* Submit */}
         <button
           type="submit"
           className="btn btn-primary w-100"
-          disabled={!match || loading}
+          disabled={loading || !!passwordError || !match || !agree}
         >
           {loading ? "Creating Account..." : "Create Account"}
         </button>
 
-        <p className="text-center mt-3 mb-0">
-          Already have an account?{" "}
-          <span
-            style={{ color: "#0d6efd", cursor: "pointer" }}
-            onClick={() => navigate("/login")}
-          >
-            Login
-          </span>
-        </p>
+        {/* Login link */}
+        <div className="text-center mt-3">
+          <p>
+            Already have an account?{" "}
+            <button
+              type="button"
+              className="btn btn-link p-0"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </button>
+          </p>
+        </div>
       </form>
     </div>
   );
