@@ -24,7 +24,7 @@ function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  /* PASSWORD LOGIC WITH STRENGHT*/
+  /* PASSWORD STRENGTH LOGIC */
   function getPasswordStrength(password: string): Strength {
     if (password.length < 8) return "weak";
 
@@ -40,8 +40,7 @@ function Signup() {
     const value = e.target.value;
     setPwd1(value);
 
-    const s = getPasswordStrength(value);
-    setStrength(s);
+    setStrength(getPasswordStrength(value));
 
     if (value.length < 8) {
       setPasswordError("Password must be at least 8 characters long.");
@@ -94,26 +93,32 @@ function Signup() {
 
         {/* Email */}
         <div className="mb-3">
-          <label>Email</label>
+          <label htmlFor="email">Email</label>
           <input
             type="email"
+            id="email"
+            name="email"
             className="form-control"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
           />
         </div>
 
         {/* Password */}
         <div className="mb-3">
-          <label>Password</label>
+          <label htmlFor="password">Password</label>
           <div className="password-container">
             <input
               type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
               className="form-control"
               required
               value={pwd1}
               onChange={handlePwd1Change}
+              autoComplete="new-password"
             />
             <span
               className="password-toggle"
@@ -148,14 +153,17 @@ function Signup() {
 
         {/* Confirm Password */}
         <div className="mb-3">
-          <label>Confirm Password</label>
+          <label htmlFor="confirmPassword">Confirm Password</label>
           <div className="password-container">
             <input
               type={showPassword ? "text" : "password"}
+              id="confirmPassword"
+              name="confirmPassword"
               className="form-control"
               required
               value={pwd2}
               onChange={handlePwd2Change}
+              autoComplete="new-password"
             />
             <span
               className="password-toggle"
@@ -174,8 +182,9 @@ function Signup() {
         <div className="mb-3 form-check">
           <input
             type="checkbox"
-            className="form-check-input"
             id="agree"
+            name="agree"
+            className="form-check-input"
             checked={agree}
             onChange={(e) => {
               setAgree(e.target.checked);
@@ -183,8 +192,9 @@ function Signup() {
             }}
           />
           <label className="form-check-label" htmlFor="agree">
-            I agree 
+            I agree
           </label>
+
           {agreeError && (
             <small className="text-danger d-block">
               You must agree before creating an account
@@ -204,7 +214,7 @@ function Signup() {
           {loading ? "Creating Account..." : "Create Account"}
         </button>
 
-        {/* Login link */}
+        {/* Login Link */}
         <div className="text-center mt-3">
           <p>
             Already have an account?{" "}
