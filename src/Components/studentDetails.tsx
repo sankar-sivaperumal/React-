@@ -118,11 +118,16 @@ export default function StudentDetails() {
       <h2 className="title">Student Records</h2>
 
       <input
+        id="student-search"
+        name="search"
+        type="search"
         className="search"
         placeholder="Search student name or city"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        autoComplete="search"
       />
+
 
       {data.map((course) => {
         const isOpen = openCourseId === course.course_id;
