@@ -37,7 +37,7 @@ const Main: React.FC = () => {
             />
 
             <Route
-              path="/student"
+              path="/students"
               element={
                 <ProtectedRoute>
                   <Student />
