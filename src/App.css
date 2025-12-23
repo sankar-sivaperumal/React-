@@ -776,3 +776,30 @@ tbody tr:hover {
 .password-toggle:hover {
   color: #3f4db8;
 }
+
+
+.password-strength {
+  margin-top: 6px;
+}
+
+.strength-bar {
+  height: 6px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  background: #e0e0e0;
+}
+
+.strength-bar.weak {
+  width: 33%;
+  background: #dc3545;
+}
+
+.strength-bar.medium {
+  width: 66%;
+  background: #ffc107;
+}
+
+.strength-bar.strong {
+  width: 100%;
+  background: #28a745;
+}
