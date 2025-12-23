@@ -43,26 +43,36 @@ function Login() {
 
         {/* Email */}
         <div className="mb-3">
-          <label className="form-label">Email</label>
+          <label className="form-label" htmlFor="loginEmail">
+            Email
+          </label>
           <input
             type="email"
+            id="loginEmail"
+            name="email"
+            className="form-control"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="form-control"
+            autoComplete="email"
           />
         </div>
 
         {/* Password */}
         <div className="mb-3">
-          <label className="form-label">Password</label>
+          <label className="form-label" htmlFor="loginPassword">
+            Password
+          </label>
           <div className="password-container">
             <input
               type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              id="loginPassword"
+              name="password"
               className="form-control"
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
             />
             <span
               className="password-toggle"
