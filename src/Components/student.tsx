@@ -51,7 +51,7 @@ function Student() {
   const sortRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
-  // ------------------ Utilities ------------------
+  //  Utilities
   const debounce = (fn: Function, delay = 500) => {
     let timer: any;
     return (...args: any[]) => {
@@ -69,7 +69,7 @@ function Student() {
       filters,
     });
 
-  // ------------------ Fetch Students ------------------
+  // Fetch Students
   const fetchStudents = async (page = currentPage) => {
     const cacheKey = buildCacheKey(page);
 
@@ -119,7 +119,7 @@ function Student() {
     fetchStudents(currentPage);
   }, [currentPage, sortField, sortOrder, filters]);
 
-  // ------------------ Pagination ------------------
+  //  Pagination 
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
 
   const nextPage = () =>
@@ -128,7 +128,7 @@ function Student() {
   const prevPage = () =>
     currentPage > 1 && setCurrentPage((p) => p - 1);
 
-  // ------------------ Sorting ------------------
+  // Sort
   const handleSortClick = (field: keyof Student) => {
     if (sortField === field) {
       setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -139,7 +139,7 @@ function Student() {
     setCurrentPage(1);
   };
 
-  // ------------------ Filtering ------------------
+  // Filter
   const handleFilterClick = (field: string) => {
     if (activeFilter === field) {
       setActiveFilter(null);
@@ -155,7 +155,7 @@ function Student() {
     setCurrentPage(1);
   }, 500);
 
-  // ------------------ Outside Click ------------------
+  //  Outside Click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
@@ -171,7 +171,7 @@ function Student() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // ------------------ UI ------------------
+  //  UI
   return (
     <>
       <h2>Students</h2>
