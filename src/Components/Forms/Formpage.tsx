@@ -3,6 +3,7 @@ import { useFormData } from "./formcontext";
 import { useNavigate } from "react-router-dom";
 import api from "./api";
 import "../../App.css";
+import { toast } from "react-toastify";
 
 const FormPage: React.FC = () => {
   const { data, updateData, reset } = useFormData();
@@ -104,19 +105,19 @@ const FormPage: React.FC = () => {
         data.marks !== "" ? Number(data.marks).toFixed(2) : undefined,
     };
 
-    try {
-      await api.post("/students", payload);
-      alert("Enrollment successful!");
-      reset();
-      setStep(1);
-      navigate("/student");
-    } catch (error: any) {
-      alert(
-        "Failed to save: " +
-          (error.response?.data?.message || "Check your data")
-      );
-    }
-  };
+  try {
+    await api.post("/students", payload);
+    toast.success("Enrollment successful!");
+    reset();
+    setStep(1);
+    navigate("/students");
+  } catch (error: any) {
+    
+    toast.error(
+      "Failed to save: " + (error.response?.data?.message || "Check your data")
+    );
+  }
+};
 
   return (
     <div>
