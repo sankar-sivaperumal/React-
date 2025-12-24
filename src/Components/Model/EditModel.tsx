@@ -14,7 +14,16 @@ export interface EditStudentModalProps {
   onSave: () => void;
 }
 
-//Custom Date Input 
+/* Allowed Cities */
+const ALLOWED_CITIES = [
+  "Tirunelveli",
+  "Chennai",
+  "Bangalore",
+  "Coimbatore",
+  "Madurai",
+  "Tirchy",
+];
+/* Custom Date Input */
 interface DateInputProps {
   value?: string;
   onClick?: () => void;
@@ -42,7 +51,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
 
 DateInput.displayName = "DateInput";
 
-
+/* Main Component */
 export default function EditStudentModal({
   open,
   loading,
@@ -59,7 +68,7 @@ export default function EditStudentModal({
 
   if (!open) return null;
 
-  //  Helpers Age auto calculate
+  /* Helpers age auto calculated*/
   const calculateAge = (dob: Date) => {
     const today = new Date();
     let age = today.getFullYear() - dob.getFullYear();
@@ -96,17 +105,18 @@ export default function EditStudentModal({
   );
 
   const months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
   ];
 
-  //  UI 
+  /* UI */
   return createPortal(
     <div className="modal-backdrop" role="dialog" aria-modal="true">
       <div className="confirm-modal">
         <h3>Edit Student</h3>
 
         <div className="modal-body">
+          {/* Name */}
           <input
             id="student-name"
             name="fullName"
@@ -115,10 +125,9 @@ export default function EditStudentModal({
             value={localData.name || ""}
             onChange={(e) => handleChange("name", e.target.value)}
             autoComplete="name"
-            aria-label="Student full name"
           />
 
-
+          {/* Age */}
           <input
             id="student-age"
             name="age"
@@ -129,6 +138,7 @@ export default function EditStudentModal({
             readOnly
           />
 
+          {/* Gender */}
           <input
             id="student-gender"
             name="gender"
@@ -138,16 +148,25 @@ export default function EditStudentModal({
             onChange={(e) => handleChange("gender", e.target.value)}
           />
 
-          <input
+          {/* City  */}
+          <select
             id="student-city"
             name="city"
             className="input"
-            placeholder="City"
             value={localData.city || ""}
             onChange={(e) => handleChange("city", e.target.value)}
-          />
+          >
+            <option value="" disabled>
+              Select City
+            </option>
+            {ALLOWED_CITIES.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
 
-          {/*DatePicker */}
+          {/* Date Picker */}
           <DatePicker
             selected={
               localData.date_of_birth
@@ -158,19 +177,11 @@ export default function EditStudentModal({
             dateFormat="dd-MM-yyyy"
             maxDate={new Date()}
             customInput={<DateInput />}
-            renderCustomHeader={({
-              date,
-              changeYear,
-              changeMonth,
-            }) => (
+            renderCustomHeader={({ date, changeYear, changeMonth }) => (
               <div className="datepicker-header">
                 <select
-                  id="dob-month"
-                  name="dob-month"
                   value={date.getMonth()}
-                  onChange={(e) =>
-                    changeMonth(Number(e.target.value))
-                  }
+                  onChange={(e) => changeMonth(Number(e.target.value))}
                 >
                   {months.map((month, index) => (
                     <option key={month} value={index}>
@@ -180,12 +191,8 @@ export default function EditStudentModal({
                 </select>
 
                 <select
-                  id="dob-year"
-                  name="dob-year"
                   value={date.getFullYear()}
-                  onChange={(e) =>
-                    changeYear(Number(e.target.value))
-                  }
+                  onChange={(e) => changeYear(Number(e.target.value))}
                 >
                   {years.map((year) => (
                     <option key={year} value={year}>
@@ -201,7 +208,6 @@ export default function EditStudentModal({
         <div className="modal-actions">
           <button
             type="button"
-            name="cancel-edit"
             className="btn-cancel"
             onClick={onCancel}
             disabled={loading}
@@ -211,7 +217,6 @@ export default function EditStudentModal({
 
           <button
             type="button"
-            name="save-edit"
             className="btn-confirm"
             onClick={onSave}
             disabled={loading}
