@@ -474,20 +474,24 @@ button:disabled {
   display: flex;
   align-items: center;
   cursor: pointer;
+  margin-top: 6px;
 }
 
 .datepicker-input input.input {
   width: 100%;
-  padding-right: 30px;
+  padding: 10px 30px;
   box-sizing: border-box;
 }
 
 .calendar-icon {
   position: absolute;
-  right: 8px;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   pointer-events: none;
   color: #555;
 }
+
 
 /* =========================
    11. RESPONSIVE
