@@ -1,36 +1,44 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { useAuth } from "../Access/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAuth } from "../Access/AuthContext";
+import CryptoJS from "crypto-js";
 import api from "../Forms/api";
+import "../../App.css";
 
-function Login() {
+const secretKey = "myLocalSecretKey"; // Keep consistent with backend
+
+const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await api.post("/auth/login", { email, password });
+      const encryptedPassword = CryptoJS.AES.encrypt(password, secretKey).toString();
+
+      const res = await api.post("/auth/login", {
+        email,
+        password: encryptedPassword,
+      });
 
       login(email, res.data.access_token);
       toast.success(`Logged in as ${email}`);
-
       navigate("/Formpage");
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Login failed";
-      toast.error(Array.isArray(errorMessage) ? errorMessage[0] : errorMessage);
+      console.error(err);
+      toast.error(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="auth-wrapper mt-5 d-flex justify-content-center">
@@ -112,6 +120,6 @@ function Login() {
       </form>
     </div>
   );
-}
+};
 
 export default Login;
