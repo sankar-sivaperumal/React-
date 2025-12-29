@@ -20,7 +20,8 @@ const FormPage: React.FC = () => {
     Partial<Record<keyof typeof data, string>>
   >({});
 
-  /* AGE CALCULATION */
+// Date Helpers with age auto calaculated
+
   const calculateAge = (dob: string) => {
     if (!dob) return "";
 
@@ -40,7 +41,14 @@ const FormPage: React.FC = () => {
     return age;
   };
 
-  /* HANDLE CHANGE */
+  const formatDateDDMMYYYY = (date: string) => {
+    if (!date) return "";
+    const [year, month, day] = date.split("-");
+    return `${day}-${month}-${year}`;
+  };
+
+// Handle Change
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -51,8 +59,6 @@ const FormPage: React.FC = () => {
         date_of_birth: value,
         age: calculateAge(value),
       });
-    } else if (name === "marks") {
-      updateData({ [name]: value as any });
     } else if (name === "course_id") {
       updateData({ [name]: value === "" ? "" : Number(value) });
     } else {
@@ -62,7 +68,8 @@ const FormPage: React.FC = () => {
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  /* STEP VALIDATION */
+//  Step validation
+
   const validateStep = () => {
     let currentErrors: Partial<Record<keyof typeof data, string>> = {};
     let isValid = true;
@@ -95,30 +102,32 @@ const FormPage: React.FC = () => {
   const handleNext = () => validateStep() && setStep(step + 1);
   const handleBack = () => setStep(step - 1);
 
-  /* SAVE */
+// Save
+
   const handleSave = async () => {
     const payload = {
       ...data,
+      date_of_birth: formatDateDDMMYYYY(data.date_of_birth),
       age: calculateAge(data.date_of_birth),
       course_id: data.course_id ? Number(data.course_id) : undefined,
       marks:
         data.marks !== "" ? Number(data.marks).toFixed(2) : undefined,
     };
 
-  try {
-    await api.post("/students", payload);
-    toast.success("Enrollment successful!");
-    reset();
-    setStep(1);
-    navigate("/students");
-  } catch (error: any) {
-    
-    toast.error(
-      "Failed to save: " + (error.response?.data?.message || "Check your data")
-    );
-  }
-};
-
+    try {
+      await api.post("/students", payload);
+      toast.success("Enrollment successful!");
+      reset();
+      setStep(1);
+      navigate("/students");
+    } catch (error: any) {
+      toast.error(
+        "Failed to save: " +
+          (error.response?.data?.message || "Check your data")
+      );
+    }
+  };
+// UI
   return (
     <div>
       {step === 1 && (
@@ -127,7 +136,7 @@ const FormPage: React.FC = () => {
 
           <div className="form">
             {/* Name */}
-              <div className="form-group">
+            <div className="form-group">
               <label htmlFor="name">
                 Name <span className="required">*</span>
               </label>
@@ -137,19 +146,17 @@ const FormPage: React.FC = () => {
                 type="text"
                 value={data.name}
                 onChange={handleChange}
-                autoComplete="name"
               />
               {errors.name && (
                 <div className="error-message">{errors.name}</div>
               )}
             </div>
 
-
             {/* Age */}
             <div className="form-group">
-             <label htmlFor="age">
-              Age <span className="required">*</span>
-            </label>
+              <label htmlFor="age">
+                Age <span className="required">*</span>
+              </label>
               <input
                 id="age"
                 name="age"
@@ -160,37 +167,38 @@ const FormPage: React.FC = () => {
             </div>
 
             {/* Gender */}
-          <div className="form-group">
-          <fieldset className="gender-options">
-            <legend>
-            Gender <span className="required">*</span>
-           </legend>
-          <div className="radio-group-wrapper"> 
-          {[
-            { value: "M", label: "Male" },
-            { value: "F", label: "Female" },
-            { value: "Other", label: "Other" },
-          ].map((g) => (
-            <label key={g.value} htmlFor={`gender-${g.value}`}>
-              <input
-                type="radio"
-                id={`gender-${g.value}`}
-                name="gender"
-                value={g.value}
-                checked={data.gender === g.value}
-                onChange={handleChange}
-              />
-              {g.label}
-            </label>
-              ))}
-            </div>
-            </fieldset>
-            {errors.gender && (
-                <div className="error-message">{errors.gender}</div>
-            )}
-        </div>
+            <div className="form-group">
+              <fieldset className="gender-options">
+                <legend>
+                  Gender <span className="required">*</span>
+                </legend>
 
-          {/* City */}
+                <div className="radio-group-wrapper">
+                  {[
+                    { value: "M", label: "Male" },
+                    { value: "F", label: "Female" },
+                    { value: "Other", label: "Other" },
+                  ].map((g) => (
+                    <label key={g.value}>
+                      <input
+                        type="radio"
+                        name="gender"
+                        value={g.value}
+                        checked={data.gender === g.value}
+                        onChange={handleChange}
+                      />
+                      {g.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              {errors.gender && (
+                <div className="error-message">{errors.gender}</div>
+              )}
+            </div>
+
+            {/* City */}
             <div className="form-group">
               <label htmlFor="city">
                 City <span className="required">*</span>
@@ -209,6 +217,7 @@ const FormPage: React.FC = () => {
                 <option value="Madurai">Madurai</option>
                 <option value="Tirchy">Tirchy</option>
               </select>
+
               {errors.city && (
                 <div className="error-message">{errors.city}</div>
               )}
@@ -293,7 +302,6 @@ const FormPage: React.FC = () => {
           </div>
         </div>
       )}
-
       {step === 3 && (
         <div className="form-container">
           <h2>Preview & Confirm</h2>
@@ -303,7 +311,10 @@ const FormPage: React.FC = () => {
             <p><strong>Age:</strong> {data.age}</p>
             <p><strong>Gender:</strong> {data.gender}</p>
             <p><strong>City:</strong> {data.city}</p>
-            <p><strong>DOB:</strong> {data.date_of_birth}</p>
+            <p>
+              <strong>DOB:</strong>{" "}
+              {formatDateDDMMYYYY(data.date_of_birth)}
+            </p>
             <p><strong>Course:</strong> {data.course_id}</p>
             <p><strong>Marks:</strong> {data.marks || "N/A"}</p>
 
