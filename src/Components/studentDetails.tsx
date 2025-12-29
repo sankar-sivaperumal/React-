@@ -139,8 +139,8 @@ export default function StudentDetails() {
               className="course-header"
               onClick={() => toggle(course.course_id)}
             >
-              <span>
-                {course.course_name} — {course.teacher_name}
+              <span >
+               ({course.course_id}) - {course.course_name} — {course.teacher_name}  
               </span>
               <span>
                 {rows.length} students {isOpen ? "▲" : "▼"}
