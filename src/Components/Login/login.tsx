@@ -104,7 +104,7 @@ const Login: React.FC = () => {
               type="button"
               className="btn btn-link p-0 small"
               style={{ fontSize: "0.85rem", textDecoration: "none" }}
-              onClick={() => handleForgotPassword()} // Or use handleForgotPassword
+              onClick={() => handleForgotPassword()} 
             >
               Forgot password?
             </button>
