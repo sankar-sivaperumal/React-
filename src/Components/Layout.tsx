@@ -10,6 +10,8 @@ import { FormProvider } from "./Forms/formcontext";
 import { AuthProvider } from "../Components/Access/AuthContext";
 import ProtectedRoute from "./Access/FlowGuard";
 import FormPage from "./Forms/Formpage";
+import ResetPassword from "./Login/ResetPassword";
+import ForgotPassword from "./Login/forgotpassword";
 
 const Main: React.FC = () => {
   return (
@@ -23,7 +25,9 @@ const Main: React.FC = () => {
             <Route path="/" element={<Navigate to="/signup" />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
-
+            {/* Forgot Password */}
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
            
             <Route
               path="/Formpage/*"
