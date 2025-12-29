@@ -23,6 +23,7 @@ const ALLOWED_CITIES = [
   "Madurai",
   "Tirchy",
 ];
+
 /* Custom Date Input */
 interface DateInputProps {
   value?: string;
@@ -68,7 +69,7 @@ export default function EditStudentModal({
 
   if (!open) return null;
 
-  /* Helpers age auto calculated*/
+  /* Helpers: age auto calculated */
   const calculateAge = (dob: Date) => {
     const today = new Date();
     let age = today.getFullYear() - dob.getFullYear();
@@ -109,7 +110,6 @@ export default function EditStudentModal({
     "July", "August", "September", "October", "November", "December",
   ];
 
-  /* UI */
   return createPortal(
     <div className="modal-backdrop" role="dialog" aria-modal="true">
       <div className="confirm-modal">
@@ -148,7 +148,7 @@ export default function EditStudentModal({
             onChange={(e) => handleChange("gender", e.target.value)}
           />
 
-          {/* City  */}
+          {/* City */}
           <select
             id="student-city"
             name="city"
@@ -180,8 +180,12 @@ export default function EditStudentModal({
             renderCustomHeader={({ date, changeYear, changeMonth }) => (
               <div className="datepicker-header">
                 <select
+                  id="dob-month"
+                  name="dob-month"
                   value={date.getMonth()}
-                  onChange={(e) => changeMonth(Number(e.target.value))}
+                  onChange={(e) =>
+                    changeMonth(Number(e.target.value))
+                  }
                 >
                   {months.map((month, index) => (
                     <option key={month} value={index}>
@@ -191,8 +195,12 @@ export default function EditStudentModal({
                 </select>
 
                 <select
+                  id="dob-year"
+                  name="dob-year"
                   value={date.getFullYear()}
-                  onChange={(e) => changeYear(Number(e.target.value))}
+                  onChange={(e) =>
+                    changeYear(Number(e.target.value))
+                  }
                 >
                   {years.map((year) => (
                     <option key={year} value={year}>

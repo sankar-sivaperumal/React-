@@ -246,9 +246,10 @@ const FormPage: React.FC = () => {
 
           <div className="form">
             <div className="form-group">
-              <label htmlFor="courses">
+              <label htmlFor="course_id">
                 Courses <span className="required">*</span>
               </label>
+
               <select
                 id="course_id"
                 name="course_id"
@@ -262,6 +263,7 @@ const FormPage: React.FC = () => {
                 <option value={104}>Computer Science</option>
                 <option value={105}>English</option>
               </select>
+
               {errors.course_id && (
                 <div className="error-message">{errors.course_id}</div>
               )}
