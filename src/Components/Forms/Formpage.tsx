@@ -246,7 +246,9 @@ const FormPage: React.FC = () => {
 
           <div className="form">
             <div className="form-group">
-              <label htmlFor="course_id">Course *</label>
+              <label htmlFor="courses">
+                Courses <span className="required">*</span>
+              </label>
               <select
                 id="course_id"
                 name="course_id"
