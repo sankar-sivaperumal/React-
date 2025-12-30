@@ -16,7 +16,9 @@ function Courses() {
       .then((data) => {
         setData(data);
       })
-      .catch(Error)
+      .catch((error) => {
+        console.error("Error fetching course data:", error);
+      });
   }, []);
 
   return (

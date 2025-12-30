@@ -40,8 +40,9 @@ function Enrollment() {
         }));
         setTotalItems(response.total || fetchedData.length);
       })
-      .catch(Error)
-       
+      .catch((error) => {
+        console.error("Error fetching enrollment data:", error);
+      });
   }, [currentPage]); 
 
       /* PAGINATION LOGIC */
