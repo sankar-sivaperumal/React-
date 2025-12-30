@@ -22,8 +22,7 @@ async function handleSubmit(e: React.FormEvent) {
 
     login( res.data.access_token);
   } catch (err) {
-    console.error(err);
-  }
+    }
 }
 
 export default handleSubmit

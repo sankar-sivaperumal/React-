@@ -33,7 +33,6 @@ const Login: React.FC = () => {
       toast.success(`Logged in as ${email}`);
       navigate("/Formpage");
     } catch (err: any) {
-      console.error(err);
       toast.error(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);

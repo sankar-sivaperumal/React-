@@ -109,7 +109,6 @@ function Student() {
       setData(fetchedData);
       setTotalItems(fetchedTotal);
     } catch (err: any) {
-      console.error("Error fetching students:", err.response?.data || err.message);
       setData([]);
       setTotalItems(0);
     }

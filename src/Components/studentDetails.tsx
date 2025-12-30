@@ -48,7 +48,6 @@ export default function StudentDetails() {
       setData(courses);
       if (courses.length && openCourseId === null) setOpenCourseId(courses[0].course_id);
     } catch (err: any) {
-      console.error("Fetch failed:", err.response?.data || err.message);
     }
   };
 
@@ -82,8 +81,7 @@ export default function StudentDetails() {
       await sleep(3000);
       await fetchCourses(); 
     } catch (err: any) {
-      console.error("Delete failed:", err.response?.data || err.message);
-      toast.error("Failed to delete student: Unauthorized");
+       toast.error("Failed to delete student: Unauthorized");
     } finally {
       setLoadingDelete(false);
     }
@@ -104,7 +102,6 @@ export default function StudentDetails() {
       await sleep(2000);
       await fetchCourses(); 
     } catch (err: any) {
-      console.error("Update failed:", err.response?.data || err.message);
       toast.error("Failed to update student: Unauthorized");
     } finally {
       setLoadingEdit(false);

@@ -73,7 +73,6 @@ const Signup: React.FC = () => {
       toast.success("Account created successfully!");
       navigate("/login");
     } catch (err: any) {
-      console.error(err);
       toast.error(err.response?.data?.message || "Signup failed");
     } finally {
       setLoading(false);
