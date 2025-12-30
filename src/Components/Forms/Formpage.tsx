@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import api from "./api";
 import "../../App.css";
 import { toast } from "react-toastify";
+import DatePicker from "react-datepicker";
 
 const FormPage: React.FC = () => {
   const { data, updateData, reset } = useFormData();
@@ -104,29 +105,29 @@ const FormPage: React.FC = () => {
 
 // Save
 
-  const handleSave = async () => {
-    const payload = {
-      ...data,
-      date_of_birth: formatDateDDMMYYYY(data.date_of_birth),
-      age: calculateAge(data.date_of_birth),
-      course_id: data.course_id ? Number(data.course_id) : undefined,
-      marks:
-        data.marks !== "" ? Number(data.marks).toFixed(2) : undefined,
-    };
-
-    try {
-      await api.post("/students", payload);
-      toast.success("Enrollment successful!");
-      reset();
-      setStep(1);
-      navigate("/students");
-    } catch (error: any) {
-      toast.error(
-        "Failed to save: " +
-          (error.response?.data?.message || "Check your data")
-      );
-    }
+const handleSave = async () => {
+  const payload = {
+    ...data,
+    // Send date in ISO format (yyyy-mm-dd)
+    date_of_birth: data.date_of_birth, 
+    age: calculateAge(data.date_of_birth),
+    course_id: data.course_id ? Number(data.course_id) : undefined,
+    marks: data.marks !== "" ? Number(data.marks).toFixed(2) : undefined,
   };
+
+  try {
+    await api.post("/students", payload);
+    toast.success("Enrollment successful!");
+    reset();
+    setStep(1);
+    navigate("/students");
+  } catch (error: any) {
+    toast.error(
+      "Failed to save: " + (error.response?.data?.message || "Check your data")
+    );
+  }
+};
+
 // UI
   return (
     <div>
@@ -144,6 +145,7 @@ const FormPage: React.FC = () => {
                 id="name"
                 name="name"
                 type="text"
+                autoComplete="name"
                 value={data.name}
                 onChange={handleChange}
               />
@@ -228,14 +230,40 @@ const FormPage: React.FC = () => {
               <label htmlFor="date_of_birth">
                 Date of Birth <span className="required">*</span>
               </label>
-              <input
+            <DatePicker
+                selected={data.date_of_birth ? new Date(data.date_of_birth) : null}
+                onChange={(date: Date | null) => {
+                  if (date) {
+                    const iso = date.toISOString().split("T")[0];
+                    updateData({
+                      date_of_birth: iso,
+                      age: calculateAge(iso),
+                    });
+                  }
+                }}
+                dateFormat="dd-MM-yyyy"
+                showMonthDropdown
+                showYearDropdown
+                scrollableYearDropdown
+                yearDropdownItemNumber={100}
+                maxDate={new Date()}
                 id="date_of_birth"
-                type="date"
                 name="date_of_birth"
-                value={data.date_of_birth}
-                onChange={handleChange}
+                customInput={
+                  <input
+                    value={
+                      data.date_of_birth
+                        ? formatDateDDMMYYYY(data.date_of_birth)
+                        : ""
+                    }
+                    onClick={(e) => e.currentTarget.focus()}
+                    readOnly
+                    className="form-control"
+                    autoComplete="off"
+                  />
+                }
               />
-              {errors.date_of_birth && (
+                {errors.date_of_birth && (
                 <div className="error-message">
                   {errors.date_of_birth}
                 </div>
