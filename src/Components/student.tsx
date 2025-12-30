@@ -264,7 +264,7 @@ function Student() {
                 <td>{student.gender}</td>
                 <td>
                   {student.date_of_birth
-                    ? new Date(student.date_of_birth).toLocaleDateString()
+                    ? new Date(student.date_of_birth).toLocaleDateString("en-GB")
                     : "N/A"}
                 </td>
                 <td>{student.city}</td>
