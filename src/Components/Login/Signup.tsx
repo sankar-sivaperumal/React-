@@ -5,22 +5,25 @@ import CryptoJS from "crypto-js";
 import api from "../Forms/api";
 import "../../App.css";
 
-const secretKey = "myLocalSecretKey"; // Keep consistent with backend for dev
+const secretKey = "myLocalSecretKey"; // Dev only – backend must match
 
 type Strength = "weak" | "medium" | "strong";
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [agree, setAgree] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [agree, setAgree] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [matchError, setMatchError] = useState<boolean>(false);
+  const [matchError, setMatchError] = useState(false);
   const [strength, setStrength] = useState<Strength>("weak");
 
   const getPasswordStrength = (pwd: string): Strength => {
@@ -41,10 +44,14 @@ const Signup: React.FC = () => {
       value.length < 8 ? "Password must be at least 8 characters long." : null
     );
 
-    if (confirmPassword) setMatchError(value !== confirmPassword);
+    if (confirmPassword) {
+      setMatchError(value !== confirmPassword);
+    }
   };
 
-  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleConfirmPasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const value = e.target.value;
     setConfirmPassword(value);
     setMatchError(password !== value);
@@ -61,9 +68,11 @@ const Signup: React.FC = () => {
     if (passwordError || matchError) return;
 
     setLoading(true);
-
     try {
-      const encryptedPassword = CryptoJS.AES.encrypt(password, secretKey).toString();
+      const encryptedPassword = CryptoJS.AES.encrypt(
+        password,
+        secretKey
+      ).toString();
 
       await api.post("/users", {
         email,
@@ -81,7 +90,7 @@ const Signup: React.FC = () => {
 
   return (
     <div className="auth-wrapper">
-      <form className="auth-form" onSubmit={handleSubmit}>
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <h1 className="text-center mb-4">Signup</h1>
 
         {/* Email */}
@@ -90,12 +99,11 @@ const Signup: React.FC = () => {
           <input
             type="email"
             id="email"
-            name="email"
             className="form-control"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
             autoComplete="email"
+            required
           />
         </div>
 
@@ -106,7 +114,6 @@ const Signup: React.FC = () => {
             <input
               type={showPassword ? "text" : "password"}
               id="password"
-              name="password"
               className="form-control"
               value={password}
               onChange={handlePasswordChange}
@@ -115,7 +122,7 @@ const Signup: React.FC = () => {
             />
             <span
               className="password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowPassword((prev) => !prev)}
             >
               <i className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"}`} />
             </span>
@@ -137,7 +144,10 @@ const Signup: React.FC = () => {
               </small>
             </div>
           )}
-          {passwordError && <small className="text-danger">{passwordError}</small>}
+
+          {passwordError && (
+            <small className="text-danger">{passwordError}</small>
+          )}
         </div>
 
         {/* Confirm Password */}
@@ -145,9 +155,8 @@ const Signup: React.FC = () => {
           <label htmlFor="confirmPassword">Confirm Password</label>
           <div className="password-container">
             <input
-              type={showPassword ? "text" : "password"}
+              type={showConfirmPassword ? "text" : "password"}
               id="confirmPassword"
-              name="confirmPassword"
               className="form-control"
               value={confirmPassword}
               onChange={handleConfirmPasswordChange}
@@ -156,12 +165,19 @@ const Signup: React.FC = () => {
             />
             <span
               className="password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
             >
-              <i className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"}`} />
+              <i
+                className={`fa ${
+                  showConfirmPassword ? "fa-eye-slash" : "fa-eye"
+                }`}
+              />
             </span>
           </div>
-          {matchError && <small className="text-danger">Passwords do not match</small>}
+
+          {matchError && (
+            <small className="text-danger">Passwords do not match</small>
+          )}
         </div>
 
         {/* Agreement */}
@@ -169,7 +185,6 @@ const Signup: React.FC = () => {
           <input
             type="checkbox"
             id="agree"
-            name="agree"
             className="form-check-input"
             checked={agree}
             onChange={(e) => setAgree(e.target.checked)}
